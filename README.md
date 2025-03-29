@@ -14,48 +14,43 @@ _____                _              _
 ---
 
 ## UPLOAD TO THE GRID: YOUR DIGITAL FORTRESS AWAITS
+
 In a world where megacorps harvest your digital pulse with every click, GreyLocker Privacy Shield rises like a neon specter in the night—a chrome-plated guardian against the all-seeing eye. This isn't just another extension; it's your digital fortress in the endless datastream, accessible only to the chosen few who possess the Megapixel Core NFT—your cryptographic key to the shadows.
+
 Jack in. The grid awaits.
 
+---
+
 ## THE NEURAL DEFENSE MATRIX
-GreyLocker doesn't just protect—it weaponizes privacy with advanced countermeasures:
 
-**HYPER-ADAPTIVE TRACKER OBLIVION** — Vaporizes corporate spyware before it can transmit your datastream, with real-time mutation detection and dynamic content shielding
+GreyLocker doesn't just protect—it *weaponizes* privacy with advanced countermeasures:
 
-**PHANTOM PRESENCE ENGINE** — Renders your digital identity as an ever-shifting ghost, deploying 12 distinct anti-fingerprinting vectors from canvas manipulation to timing attack prevention
-
-**QUANTUM AUDIO SHIELD** — Disrupts soundprint tracking with subtle noise injection, making your audio signature as untraceable as footsteps in digital rain
-
-**NEURAL HEADER RECONFIGURATOR** — Rebuilds request headers in real-time, leaving only ghosted trails in your wake
-
-**WEBGL PROJECTION SCRAMBLER** — Distorts graphical fingerprinting methods while preserving visual integrity of legitimate content
-
-**TEMPORAL DISRUPTION FIELD** — Obfuscates high-precision timing attacks used for hardware identification
-
-**CHROMIUM API COUNTERMEASURES** — Neutralizes browser-specific tracking vectors with specialized stealth protocols
-
-**STORAGE VAULT DEFENDER** — Prevents fingerprinting via localStorage, sessionStorage, and IndexedDB with active interception
-
-**CRYPTOGRAPHIC VERIFICATION MATRIX** — Solana-powered authentication that keeps the datastream pure
+- **HYPER-ADAPTIVE TRACKER OBLIVION** — Vaporizes corporate spyware before it can transmit your datastream, with real-time mutation detection and dynamic content shielding
+- **PHANTOM PRESENCE ENGINE** — Renders your digital identity as an ever-shifting ghost, deploying 12 distinct anti-fingerprinting vectors from canvas manipulation to timing attack prevention
+- **QUANTUM AUDIO SHIELD** — Disrupts soundprint tracking with subtle noise injection, making your audio signature as untraceable as footsteps in digital rain
+- **NEURAL HEADER RECONFIGURATOR** — Rebuilds request headers in real-time, leaving only ghosted trails in your wake
+- **WEBGL PROJECTION SCRAMBLER** — Distorts graphical fingerprinting methods while preserving visual integrity of legitimate content
+- **TEMPORAL DISRUPTION FIELD** — Obfuscates high-precision timing attacks used for hardware identification
+- **CHROMIUM API COUNTERMEASURES** — Neutralizes browser-specific tracking vectors with specialized stealth protocols
+- **STORAGE VAULT DEFENDER** — Prevents fingerprinting via localStorage, sessionStorage, and IndexedDB with active interception
+- **CRYPTOGRAPHIC VERIFICATION MATRIX** — Solana-powered authentication that keeps the datastream pure
 
 While the masses remain exposed in the digital bazaar, you move like a shadow, untraceable, your data encrypted in military-grade quantum steel.
 
+---
+
 ## SYSTEM REQUIREMENTS
 
-Chrome/Brave/Edge: v85+
+- **Chrome/Brave/Edge**: v85+
+- **Solana Wallet**: Phantom or Solflare
+- **Critical Asset**: One Megapixel Core NFT
+- **System Specs**: 4GB RAM, modern processor
+- **Connection**: Stable uplink to the grid
 
-Solana Wallet: Phantom or Solflare
+*"In a world of glass, be the ghost in the machine."*
 
-Critical Asset: One Megapixel Core NFT
-
-System Specs: 4GB RAM, modern processor
-
-Connection: Stable uplink to the grid
-
-"In a world of glass, be the ghost in the machine."
-
+---
 ## INITIALIZING THE SHIELD
-
 ```
 ▌ ▐ █▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▌ ▐ 
 ▌ ▐ █                                                             █ ▐ 
@@ -124,55 +119,47 @@ The GreyLocker interface is your command deck, engineered for maximum control wi
 +------------------------------------------+
 ```
 
-Toggle privacy shields with precision using the neon-lit interface. Each feature can be independently activated or deactivated based on your operational requirements.
+Toggle privacy shields with precision using the neon-lit interface. Each feature can be independently activated or deactivated based on your operational requirements, with unprecedented granularity over your digital presence.
 
 ---
 
 ## TECHNICAL ARCHITECTURE
+
 GreyLocker operates on five critical subroutines:
 
-**VERIFICATION PROTOCOL**
+1. **VERIFICATION PROTOCOL**
+   - Establishes secure connection to Solana mainnet
+   - Verifies Megapixel Core NFT ownership through cryptographic proof
+   - Creates secure session token for continued operation
+   - Periodic re-verification with minimal blockchain interaction
 
-Establishes secure connection to Solana mainnet
-Verifies Megapixel Core NFT ownership through cryptographic proof
-Creates secure session token for continued operation
-Periodic re-verification with minimal blockchain interaction
+2. **DYNAMIC SHIELD MATRIX**
+   - Neural network pattern recognition for tracker identification
+   - MutationObserver technology to intercept dynamically injected trackers
+   - DOM manipulation prevention to block tracker insertion attempts
+   - Pseudorandom identifier generation for consistent but untraceable responses
 
+3. **FINGERPRINT COUNTERMEASURES**
+   - 12-vector fingerprinting protection for canvas, WebGL, audio, and more
+   - Browser property normalization with minimal site breakage
+   - Subtle noise injection across multiple identification vectors
+   - Font enumeration protection with allowlisting for common system fonts
 
-**DYNAMIC SHIELD MATRIX**
+4. **STEALTH PROTOCOLS**
+   - Chrome-specific API obfuscation for extension concealment
+   - WebRTC protection against IP address leakage
+   - Tracking parameter cleansing from URLs
+   - Storage access monitoring and interception
 
-Neural network pattern recognition for tracker identification
-MutationObserver technology to intercept dynamically injected trackers
-DOM manipulation prevention to block tracker insertion attempts
-Pseudorandom identifier generation for consistent but untraceable responses
+5. **PERFORMANCE OPTIMIZATION**
+   - Selective protection application based on context
+   - Debug mode with performance measurement
+   - Real-time statistics reporting
+   - Minimal performance impact on legitimate site functions
 
+*"Privacy isn't just a right—it's a weapon."*
 
-**FINGERPRINT COUNTERMEASURES**
-
-12-vector fingerprinting protection for canvas, WebGL, audio, and more
-Browser property normalization with minimal site breakage
-Subtle noise injection across multiple identification vectors
-Font enumeration protection with allowlisting for common system fonts
-
-
-**STEALTH PROTOCOLS**
-
-Chrome-specific API obfuscation for extension concealment
-WebRTC protection against IP address leakage
-Tracking parameter cleansing from URLs
-Storage access monitoring and interception
-
-
-**PERFORMANCE OPTIMIZATION**
-
-Selective protection application based on context
-Debug mode with performance measurement
-Real-time statistics reporting
-Minimal performance impact on legitimate site functions
-
-
-
-"Privacy isn't just a right—it's a weapon."
+---
 
 ## DEPLOYMENT TO MAINFRAME [CPANEL]
 
@@ -210,6 +197,8 @@ GreyLocker operates under strict security protocols:
 - **PERMISSION MINIMALISM** — Only requests permissions essential to operation
 - **ENCRYPTED COMMUNICATION** — All wallet interaction secured with military-grade encryption
 - **OFFLINE VERIFICATION** — NFT ownership can be verified without constant connection
+- **DETECTION AVOIDANCE** — Anti-anti-fingerprinting countermeasures to prevent tracking detection
+- **ADAPTIVE DEFENSE** — Real-time adjustment of protection parameters based on site behavior
 
 *"In a world of surveillance, invisibility is power."*
 
@@ -237,6 +226,9 @@ GreyLocker was forged in the digital fires by a collective of netrunners dedicat
 - **NeonPhantom** — Solana Integration
 - **CipherPulse** — Privacy Algorithms
 - **VoidRaven** — UI/UX Design
+- **QuantumGhost** — Fingerprint Countermeasures
+- **EchoSilence** — Audio Protection Systems
+- **PixelShift** — Canvas/WebGL Defense Matrix
 
 *"We don't build tools. We build fortresses."*
 
@@ -255,6 +247,8 @@ For mission-critical communications, use our PGP key available on the secure ser
 ## FINAL TRANSMISSION
 
 In the endless datastream, your digital footprint is a commodity—bought, sold, and traded by faceless corporations. GreyLocker Privacy Shield isn't just software; it's your declaration of independence in a world where privacy has become a luxury.
+
+With 12-vector fingerprinting protection, neural network tracker detection, and real-time countermeasures, you've transcended mere anonymity. You've become digital entropy—a ghost in the machine that leaves no trace, casts no shadow.
 
 This is more than code—it's resistance.
 
