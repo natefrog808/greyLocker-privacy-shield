@@ -1,7 +1,5 @@
 # GreyLocker Privacy Shield
 
-![GreyLocker Banner](https://placeholder-image.com/greylocker-banner.jpg)
-
 ~~~
 _____                _              _             
 |  __ \              | |            | |            
