@@ -1,5 +1,5 @@
 ~~~
-privacy-extension/
+Greylocker-Privacy-Sheild/
 ├── manifest.json         # Extension configuration
 ├── background.js         # Background scripts
 ├── popup/
