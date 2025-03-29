@@ -13,7 +13,7 @@
         <img src="../assets/icons/icon48.png" alt="GreyLocker Logo">
         <h1>GreyLocker</h1>
       </div>
-      <p class="tagline">Your privacy fortress, powered by NFTs</p>
+      <p class="tagline">Digital Fortress // NFT-Powered Privacy</p>
     </header>
     
     <main>
@@ -41,33 +41,45 @@
       
       <!-- Privacy Features (Shown when connected & verified) -->
       <div id="features-section" class="section hidden">
-        <h2>Privacy Settings</h2>
+        <h2>Privacy Matrix</h2>
+        <div class="stats-panel">
+          <div class="stat-box">
+            <span id="blocks-count">0</span>
+            <span class="stat-label">Trackers Blocked</span>
+          </div>
+          <div class="stat-box">
+            <span id="fingerprints-count">0</span>
+            <span class="stat-label">Fingerprints Obfuscated</span>
+          </div>
+        </div>
+        
         <div class="feature-toggles">
+          <h3>Core Shields</h3>
           <div class="feature">
             <div class="feature-header">
-              <h3>Tracker Blocking</h3>
+              <h4>Tracker Blocking</h4>
               <label class="switch">
                 <input type="checkbox" id="tracker-blocking" checked>
                 <span class="slider round"></span>
               </label>
             </div>
-            <p>Block common tracking scripts and cookies</p>
+            <p>Block corporate trackers and analytics scripts</p>
           </div>
           
           <div class="feature">
             <div class="feature-header">
-              <h3>Fingerprint Protection</h3>
+              <h4>Fingerprint Protection</h4>
               <label class="switch">
                 <input type="checkbox" id="fingerprint-protection" checked>
                 <span class="slider round"></span>
               </label>
             </div>
-            <p>Prevent browser fingerprinting techniques</p>
+            <p>Prevent browser identification techniques</p>
           </div>
           
           <div class="feature">
             <div class="feature-header">
-              <h3>HTTPS Upgrade</h3>
+              <h4>HTTPS Upgrade</h4>
               <label class="switch">
                 <input type="checkbox" id="https-upgrade" checked>
                 <span class="slider round"></span>
@@ -78,7 +90,7 @@
           
           <div class="feature">
             <div class="feature-header">
-              <h3>Header Protection</h3>
+              <h4>Header Protection</h4>
               <label class="switch">
                 <input type="checkbox" id="header-protection" checked>
                 <span class="slider round"></span>
@@ -86,13 +98,91 @@
             </div>
             <p>Sanitize request headers to prevent tracking</p>
           </div>
+          
+          <div class="advanced-toggle" id="advanced-toggle">
+            <span>Advanced Protection Matrix</span>
+            <span class="toggle-icon">▾</span>
+          </div>
+          
+          <div class="advanced-features hidden" id="advanced-features">
+            <div class="feature">
+              <div class="feature-header">
+                <h4>Canvas Protection</h4>
+                <label class="switch">
+                  <input type="checkbox" id="canvas-protection" checked>
+                  <span class="slider round"></span>
+                </label>
+              </div>
+              <p>Prevent canvas-based fingerprinting</p>
+            </div>
+            
+            <div class="feature">
+              <div class="feature-header">
+                <h4>WebGL Protection</h4>
+                <label class="switch">
+                  <input type="checkbox" id="webgl-protection" checked>
+                  <span class="slider round"></span>
+                </label>
+              </div>
+              <p>Block WebGL-based hardware identification</p>
+            </div>
+            
+            <div class="feature">
+              <div class="feature-header">
+                <h4>Audio Protection</h4>
+                <label class="switch">
+                  <input type="checkbox" id="audio-protection" checked>
+                  <span class="slider round"></span>
+                </label>
+              </div>
+              <p>Defeat audio-based fingerprinting methods</p>
+            </div>
+            
+            <div class="feature">
+              <div class="feature-header">
+                <h4>Font Protection</h4>
+                <label class="switch">
+                  <input type="checkbox" id="font-protection" checked>
+                  <span class="slider round"></span>
+                </label>
+              </div>
+              <p>Prevent font enumeration tracking</p>
+            </div>
+            
+            <div class="feature">
+              <div class="feature-header">
+                <h4>WebRTC Protection</h4>
+                <label class="switch">
+                  <input type="checkbox" id="webrtc-protection" checked>
+                  <span class="slider round"></span>
+                </label>
+              </div>
+              <p>Block IP address leakage via WebRTC</p>
+            </div>
+            
+            <div class="feature">
+              <div class="feature-header">
+                <h4>Timing Attack Protection</h4>
+                <label class="switch">
+                  <input type="checkbox" id="timing-protection" checked>
+                  <span class="slider round"></span>
+                </label>
+              </div>
+              <p>Prevent high-precision timing attacks</p>
+            </div>
+          </div>
         </div>
       </div>
       
       <!-- NFT Verification Failed Section -->
       <div id="verification-failed" class="section hidden">
         <h2>NFT Verification Failed</h2>
-        <p>We couldn't find a Megapixel Core NFT in this wallet.</p>
+        <div class="nft-error">
+          <svg viewBox="0 0 24 24" width="48" height="48">
+            <path fill="#ff3366" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"></path>
+          </svg>
+          <p>We couldn't find a Megapixel Core NFT in this wallet.</p>
+        </div>
         <div class="nft-info">
           <p>To use GreyLocker Privacy Shield, you need to own a Megapixel Core NFT.</p>
           <a href="https://marketplace.solana.com" target="_blank" class="nft-link">Get Megapixel Core NFT</a>
@@ -108,7 +198,9 @@
           <div class="wallet-address">
             <span id="wallet-address-text">...</span>
             <button id="copy-address" class="icon-button">
-              <span class="material-icons">content_copy</span>
+              <svg viewBox="0 0 24 24" width="16" height="16">
+                <path fill="currentColor" d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"></path>
+              </svg>
             </button>
           </div>
         </div>
@@ -117,7 +209,7 @@
     </main>
     
     <footer>
-      <p>GreyLocker v1.0.0 | <a href="https://greylocker.io" target="_blank">Website</a></p>
+      <p>GreyLocker v1.0.0 | <a href="https://github.com/greylocker/privacy-shield" target="_blank">GitHub</a></p>
     </footer>
   </div>
   
