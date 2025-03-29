@@ -20,15 +20,23 @@ Jack in. The grid awaits.
 ## THE NEURAL DEFENSE MATRIX
 GreyLocker doesn't just protect—it weaponizes privacy with advanced countermeasures:
 
-HYPER-ADAPTIVE TRACKER OBLIVION — Vaporizes corporate spyware before it can transmit your datastream, with real-time mutation detection and dynamic content shielding
-PHANTOM PRESENCE ENGINE — Renders your digital identity as an ever-shifting ghost, deploying 12 distinct anti-fingerprinting vectors from canvas manipulation to timing attack prevention
-QUANTUM AUDIO SHIELD — Disrupts soundprint tracking with subtle noise injection, making your audio signature as untraceable as footsteps in digital rain
-NEURAL HEADER RECONFIGURATOR — Rebuilds request headers in real-time, leaving only ghosted trails in your wake
-WEBGL PROJECTION SCRAMBLER — Distorts graphical fingerprinting methods while preserving visual integrity of legitimate content
-TEMPORAL DISRUPTION FIELD — Obfuscates high-precision timing attacks used for hardware identification
-CHROMIUM API COUNTERMEASURES — Neutralizes browser-specific tracking vectors with specialized stealth protocols
-STORAGE VAULT DEFENDER — Prevents fingerprinting via localStorage, sessionStorage, and IndexedDB with active interception
-CRYPTOGRAPHIC VERIFICATION MATRIX — Solana-powered authentication that keeps the datastream pure
+**HYPER-ADAPTIVE TRACKER OBLIVION** — Vaporizes corporate spyware before it can transmit your datastream, with real-time mutation detection and dynamic content shielding
+
+**PHANTOM PRESENCE ENGINE** — Renders your digital identity as an ever-shifting ghost, deploying 12 distinct anti-fingerprinting vectors from canvas manipulation to timing attack prevention
+
+**QUANTUM AUDIO SHIELD** — Disrupts soundprint tracking with subtle noise injection, making your audio signature as untraceable as footsteps in digital rain
+
+**NEURAL HEADER RECONFIGURATOR** — Rebuilds request headers in real-time, leaving only ghosted trails in your wake
+
+**WEBGL PROJECTION SCRAMBLER** — Distorts graphical fingerprinting methods while preserving visual integrity of legitimate content
+
+**TEMPORAL DISRUPTION FIELD** — Obfuscates high-precision timing attacks used for hardware identification
+
+**CHROMIUM API COUNTERMEASURES** — Neutralizes browser-specific tracking vectors with specialized stealth protocols
+
+**STORAGE VAULT DEFENDER** — Prevents fingerprinting via localStorage, sessionStorage, and IndexedDB with active interception
+
+**CRYPTOGRAPHIC VERIFICATION MATRIX** — Solana-powered authentication that keeps the datastream pure
 
 While the masses remain exposed in the digital bazaar, you move like a shadow, untraceable, your data encrypted in military-grade quantum steel.
 
