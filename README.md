@@ -43,9 +43,13 @@ While the masses remain exposed in the digital bazaar, you move like a shadow, u
 ## SYSTEM REQUIREMENTS
 
 Chrome/Brave/Edge: v85+
+
 Solana Wallet: Phantom or Solflare
+
 Critical Asset: One Megapixel Core NFT
+
 System Specs: 4GB RAM, modern processor
+
 Connection: Stable uplink to the grid
 
 "In a world of glass, be the ghost in the machine."
