@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <!-- Background gradient -->
+  <defs>
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#171b26" />
+      <stop offset="100%" stop-color="#0d1117" />
+    </linearGradient>
+    
+    <!-- Lock body gradient -->
+    <linearGradient id="lock-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00f2ff" />
+      <stop offset="100%" stop-color="#33ff99" />
+    </linearGradient>
+    
+    <!-- Glow filter -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    
+    <!-- Inner glow for lock -->
+    <filter id="inner-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  
+  <!-- Base circle -->
+  <circle cx="64" cy="64" r="60" fill="url(#bg-gradient)" />
+  <circle cx="64" cy="64" r="58" fill="none" stroke="#33ff99" stroke-width="1" stroke-opacity="0.2" />
+  <circle cx="64" cy="64" r="54" fill="none" stroke="#00f2ff" stroke-width="1" stroke-opacity="0.2" />
+  
+  <!-- Shield shape -->
+  <path d="M64 20 C40 30, 30 45, 30 70 C30 90, 45 100, 64 108 C83 100, 98 90, 98 70 C98 45, 88 30, 64 20 Z" 
+        fill="none" stroke="url(#lock-gradient)" stroke-width="2.5" filter="url(#glow)" />
+  
+  <!-- Lock body -->
+  <rect x="43" y="54" width="42" height="34" rx="8" fill="url(#lock-gradient)" filter="url(#inner-glow)" />
+  
+  <!-- Lock shackle -->
+  <path d="M55 54 L55 42 C55 35, 60 30, 64 30 C68 30, 73 35, 73 42 L73 54" 
+        fill="none" stroke="url(#lock-gradient)" stroke-width="6" stroke-linecap="round" filter="url(#glow)" />
+  
+  <!-- Keyhole -->
+  <circle cx="64" cy="68" r="6" fill="#0d1117" />
+  <path d="M64 74 L64 80" stroke="#0d1117" stroke-width="4" stroke-linecap="round" />
+  
+  <!-- Digital circuit lines -->
+  <path d="M30 58 L38 58" stroke="#00f2ff" stroke-width="1" />
+  <path d="M30 70 L38 70" stroke="#33ff99" stroke-width="1" />
+  <path d="M90 58 L98 58" stroke="#00f2ff" stroke-width="1" />
+  <path d="M90 70 L98 70" stroke="#33ff99" stroke-width="1" />
+  <path d="M64 108 L64 116" stroke="#33ff99" stroke-width="1" />
+  <path d="M55 116 L73 116" stroke="#00f2ff" stroke-width="1" />
+  
+  <!-- Digital dots -->
+  <circle cx="38" cy="58" r="1.5" fill="#00f2ff" />
+  <circle cx="38" cy="70" r="1.5" fill="#33ff99" />
+  <circle cx="90" cy="58" r="1.5" fill="#00f2ff" />
+  <circle cx="90" cy="70" r="1.5" fill="#33ff99" />
+  <circle cx="55" cy="116" r="1.5" fill="#00f2ff" />
+  <circle cx="73" cy="116" r="1.5" fill="#00f2ff" />
+  <circle cx="64" cy="116" r="1.5" fill="#33ff99" />
+</svg>
