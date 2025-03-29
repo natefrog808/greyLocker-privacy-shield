@@ -1,7 +1,9 @@
 /* Base Styles */
 :root {
   --primary: #00f2ff;
+  --primary-dark: #00a4aa;
   --secondary: #33ff99;
+  --secondary-dark: #28cc7a;
   --background: #0d1117;
   --card-bg: #171b26;
   --text: #e6e6e6;
@@ -9,18 +11,36 @@
   --success: #33ff99;
   --warning: #ff9933;
   --error: #ff3366;
+  --font-main: 'Rajdhani', 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+@font-face {
+  font-family: 'Rajdhani';
+  src: url('../assets/fonts/Rajdhani-Medium.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('../assets/fonts/JetBrainsMono-Regular.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
 }
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Inter', 'Roboto', sans-serif;
+  font-family: var(--font-main);
 }
 
 body {
   background-color: var(--background);
   color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .container {
@@ -30,10 +50,25 @@ body {
   padding: 1.5rem;
 }
 
+/* Scrollbar Styling */
+.container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.container::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+.container::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, var(--primary), var(--secondary));
+  border-radius: 3px;
+}
+
 /* Header Styles */
 header {
   margin-bottom: 1.5rem;
   text-align: center;
+  position: relative;
 }
 
 .logo {
@@ -56,11 +91,15 @@ header {
   background-clip: text;
   -webkit-text-fill-color: transparent;
   letter-spacing: 1px;
+  font-weight: 700;
+  text-transform: uppercase;
 }
 
 .tagline {
   color: var(--text-secondary);
   font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 /* Status Indicator */
@@ -72,6 +111,18 @@ header {
   padding: 0.5rem;
   background-color: rgba(255, 255, 255, 0.05);
   border-radius: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.status-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--primary), transparent);
 }
 
 .status-indicator {
@@ -80,14 +131,24 @@ header {
   border-radius: 50%;
   margin-right: 0.5rem;
   background-color: var(--error);
+  position: relative;
 }
 
 .status-indicator.connected {
   background-color: var(--success);
+  box-shadow: 0 0 10px var(--success);
 }
 
 .status-indicator.pending {
   background-color: var(--warning);
+  animation: pulse 1.5s infinite;
+}
+
+#status-text {
+  font-weight: 600;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
 }
 
 /* Section Styles */
@@ -98,12 +159,44 @@ header {
   margin-bottom: 1.25rem;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--primary), transparent);
+}
+
+.section::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--secondary), transparent);
 }
 
 .section h2 {
   font-size: 1.25rem;
   margin-bottom: 1rem;
   color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+}
+
+.section h2::before {
+  content: '>';
+  margin-right: 0.5rem;
+  color: var(--secondary);
 }
 
 .section p {
@@ -131,17 +224,75 @@ header {
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
 }
 
 .wallet-button:hover {
   background-color: rgba(255, 255, 255, 0.1);
   transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 242, 255, 0.2);
+}
+
+.wallet-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg, 
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transition: left 0.7s ease;
+}
+
+.wallet-button:hover::before {
+  left: 100%;
 }
 
 .wallet-button img {
   width: 24px;
   height: 24px;
   margin-right: 0.75rem;
+}
+
+/* Stats Panel */
+.stats-panel {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 1.5rem;
+  padding: 0.75rem;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.stat-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.stat-box span:first-child {
+  font-size: 1.5rem;
+  font-weight: bold;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-family: var(--font-mono);
+}
+
+.stat-label {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 /* Feature Toggles */
@@ -151,10 +302,26 @@ header {
   gap: 1rem;
 }
 
+.feature-toggles h3 {
+  font-size: 1rem;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.5rem;
+}
+
 .feature {
   padding: 0.75rem;
   background-color: rgba(255, 255, 255, 0.03);
   border-radius: 8px;
+  transition: transform 0.2s ease;
+}
+
+.feature:hover {
+  transform: translateX(2px);
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
 .feature-header {
@@ -164,14 +331,57 @@ header {
   margin-bottom: 0.5rem;
 }
 
-.feature h3 {
-  font-size: 1rem;
+.feature h4 {
+  font-size: 0.9rem;
   font-weight: 500;
+  margin: 0;
+  color: var(--text);
 }
 
 .feature p {
   font-size: 0.75rem;
   margin-bottom: 0;
+  color: var(--text-secondary);
+}
+
+/* Advanced Features Toggle */
+.advanced-toggle {
+  padding: 0.75rem;
+  background-color: rgba(0, 242, 255, 0.1);
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+  border: 1px solid rgba(0, 242, 255, 0.2);
+  transition: all 0.2s ease;
+}
+
+.advanced-toggle:hover {
+  background-color: rgba(0, 242, 255, 0.15);
+}
+
+.advanced-toggle span {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.toggle-icon {
+  transition: transform 0.3s ease;
+}
+
+.advanced-toggle.active .toggle-icon {
+  transform: rotate(180deg);
+}
+
+.advanced-features {
+  margin-top: 1rem;
+  border-top: 1px dashed rgba(255, 255, 255, 0.1);
+  padding-top: 1rem;
 }
 
 /* Toggle Switch */
@@ -211,7 +421,7 @@ header {
 }
 
 input:checked + .slider {
-  background-color: var(--secondary);
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
 }
 
 input:focus + .slider {
@@ -230,6 +440,53 @@ input:checked + .slider:before {
   border-radius: 50%;
 }
 
+/* NFT Verification Failed */
+.nft-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background-color: rgba(255, 51, 102, 0.1);
+  border-radius: 8px;
+}
+
+.nft-error svg {
+  margin-bottom: 0.75rem;
+}
+
+.nft-error p {
+  color: var(--error);
+  text-align: center;
+  margin-bottom: 0;
+}
+
+/* NFT Info */
+.nft-info {
+  margin: 1rem 0;
+  padding: 1rem;
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.03);
+  text-align: center;
+}
+
+.nft-link {
+  display: inline-block;
+  margin-top: 0.5rem;
+  color: var(--primary);
+  text-decoration: none;
+  font-size: 0.875rem;
+  border: 1px solid var(--primary);
+  padding: 0.4rem 0.75rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.nft-link:hover {
+  background-color: var(--primary);
+  color: var(--background);
+}
+
 /* Wallet Connected */
 .wallet-info {
   margin-bottom: 1rem;
@@ -242,13 +499,14 @@ input:checked + .slider:before {
   padding: 0.5rem;
   border-radius: 6px;
   margin-top: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .wallet-address span {
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.75rem;
 }
 
@@ -258,10 +516,13 @@ input:checked + .slider:before {
   color: var(--text-secondary);
   cursor: pointer;
   padding: 0.25rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
 }
 
 .icon-button:hover {
   color: var(--primary);
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
 /* Buttons */
@@ -275,30 +536,36 @@ input:checked + .slider:before {
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  position: relative;
+  overflow: hidden;
 }
 
 .secondary-button:hover {
   background-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* NFT Info */
-.nft-info {
-  margin: 1rem 0;
-  padding: 1rem;
-  border-radius: 8px;
-  background-color: rgba(255, 255, 255, 0.03);
+.secondary-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg, 
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transition: left 0.7s ease;
 }
 
-.nft-link {
-  display: inline-block;
-  margin-top: 0.5rem;
-  color: var(--primary);
-  text-decoration: none;
-  font-size: 0.875rem;
-}
-
-.nft-link:hover {
-  text-decoration: underline;
+.secondary-button:hover::before {
+  left: 100%;
 }
 
 /* Footer */
@@ -307,14 +574,18 @@ footer {
   text-align: center;
   font-size: 0.75rem;
   color: var(--text-secondary);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 1rem;
 }
 
 footer a {
   color: var(--primary);
   text-decoration: none;
+  transition: color 0.2s ease;
 }
 
 footer a:hover {
+  color: var(--secondary);
   text-decoration: underline;
 }
 
@@ -326,16 +597,95 @@ footer a:hover {
 /* Animations */
 @keyframes pulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(0, 242, 255, 0.4);
+    box-shadow: 0 0 0 0 rgba(255, 153, 51, 0.4);
   }
   70% {
-    box-shadow: 0 0 0 10px rgba(0, 242, 255, 0);
+    box-shadow: 0 0 0 10px rgba(255, 153, 51, 0);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(0, 242, 255, 0);
+    box-shadow: 0 0 0 0 rgba(255, 153, 51, 0);
   }
 }
 
 .status-indicator.connected {
-  animation: pulse 2s infinite;
+  animation: glow 2s infinite;
+}
+
+@keyframes glow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(51, 255, 153, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(51, 255, 153, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(51, 255, 153, 0);
+  }
+}
+
+/* Cyberpunk Neon Line Effect */
+.section:before,
+.section:after {
+  content: '';
+  position: absolute;
+  height: 1px;
+  width: 100%;
+  left: 0;
+}
+
+.section:before {
+  top: 0;
+  background: linear-gradient(90deg, 
+    transparent, 
+    transparent 20%, 
+    var(--primary) 50%, 
+    transparent 80%, 
+    transparent
+  );
+}
+
+.section:after {
+  bottom: 0;
+  background: linear-gradient(90deg, 
+    transparent, 
+    transparent 20%, 
+    var(--secondary) 50%, 
+    transparent 80%, 
+    transparent
+  );
+}
+
+/* Digital Rain Animation for Connected Status */
+@keyframes digital-rain {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 0% 100%;
+  }
+}
+
+.section.active-shield {
+  position: relative;
+  overflow: hidden;
+}
+
+.section.active-shield::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  background: 
+    repeating-linear-gradient(
+      0deg,
+      rgba(51, 255, 153, 0.05) 0%,
+      rgba(51, 255, 153, 0) 2%,
+      rgba(51, 255, 153, 0) 5%
+    );
+  background-size: 100% 1000%;
+  animation: digital-rain 20s linear infinite;
+  pointer-events: none;
+  z-index: -1;
 }
