@@ -1,8 +1,4 @@
 # GreyLocker Privacy Shield
-<p align="center">
-  <img src="assets/icons/icon128.png" alt="GreyLocker Privacy Shield" width="128" height="128"/>
-</p>
-
 ~~~
 _____                _              _             
 |  __ \              | |            | |            
