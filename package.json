@@ -7,14 +7,19 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "mkdir -p dist && cp -r manifest.json background.js popup content lib assets dist/",
     "zip": "cd dist && zip -r ../greylocker-privacy-shield.zip *",
-    "deploy": "node deploy-to-cpanel.js"
+    "deploy": "node deploy-to-cpanel.js",
+    "start": "web-ext run --source-dir ./",
+    "lint": "web-ext lint --source-dir ./",
+    "build:icons": "node generate-icons.js"
   },
   "keywords": [
     "privacy",
     "browser-extension",
     "solana",
     "nft",
-    "web3"
+    "web3",
+    "fingerprinting",
+    "tracker-blocking"
   ],
   "author": "GreyLocker Team",
   "license": "MIT",
@@ -25,6 +30,8 @@
     "form-data": "^4.0.0"
   },
   "devDependencies": {
-    "archiver": "^6.0.1"
+    "archiver": "^6.0.1",
+    "sharp": "^0.32.6",
+    "web-ext": "^7.8.0"
   }
 }
