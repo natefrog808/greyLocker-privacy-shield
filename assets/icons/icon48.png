@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <!-- Background -->
+  <rect width="48" height="48" rx="6" fill="#0d1117"/>
+  
+  <!-- Shield outline -->
+  <path d="M24 6C16.5 9 13.5 12 13.5 22.5C13.5 30 18 33 24 36C30 33 34.5 30 34.5 22.5C34.5 12 31.5 9 24 6Z" 
+        stroke="#00f2ff" stroke-width="2" fill="none"/>
+  
+  <!-- Digital circuit lines -->
+  <path d="M13.5 18 L16 18" stroke="#00f2ff" stroke-width="0.75" />
+  <path d="M13.5 27 L16 27" stroke="#33ff99" stroke-width="0.75" />
+  <path d="M32 18 L34.5 18" stroke="#00f2ff" stroke-width="0.75" />
+  <path d="M32 27 L34.5 27" stroke="#33ff99" stroke-width="0.75" />
+  
+  <!-- Digital dots -->
+  <circle cx="16" cy="18" r="0.75" fill="#00f2ff" />
+  <circle cx="16" cy="27" r="0.75" fill="#33ff99" />
+  <circle cx="32" cy="18" r="0.75" fill="#00f2ff" />
+  <circle cx="32" cy="27" r="0.75" fill="#33ff99" />
+  
+  <!-- Lock body -->
+  <rect x="18" y="21" width="12" height="9" rx="3" fill="#33ff99"/>
+  
+  <!-- Lock shackle -->
+  <path d="M21 21 L21 16.5 C21 14.5 22.3 13 24 13 C25.7 13 27 14.5 27 16.5 L27 21" 
+        stroke="#33ff99" stroke-width="2" stroke-linecap="round" fill="none"/>
+  
+  <!-- Keyhole -->
+  <circle cx="24" cy="24.5" r="1.5" fill="#0d1117" />
+  <path d="M24 26 L24 27.5" stroke="#0d1117" stroke-width="1.5" stroke-linecap="round" />
+</svg>
