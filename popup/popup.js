@@ -85,6 +85,11 @@ function setupEventListeners() {
   
   // Advanced toggle
   advancedToggle.addEventListener('click', toggleAdvancedFeatures);
+  
+  // Open dashboard in a new tab when button is clicked
+  document.getElementById('open-dashboard')?.addEventListener('click', function() {
+    chrome.tabs.create({ url: chrome.runtime.getURL('dashboard/dashboard.html') });
+  });
 }
 
 // Check if wallet is already connected
