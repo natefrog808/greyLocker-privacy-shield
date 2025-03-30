@@ -9,7 +9,8 @@
     "webRequest",
     "webRequestBlocking",
     "scripting",
-    "notifications"
+    "notifications",
+    "clipboardWrite"
   ],
   "host_permissions": [
     "<all_urls>"
@@ -23,7 +24,8 @@
       "16": "assets/icons/icon16.png",
       "48": "assets/icons/icon48.png",
       "128": "assets/icons/icon128.png"
-    }
+    },
+    "default_title": "GreyLocker Privacy Shield"
   },
   "content_scripts": [
     {
@@ -39,7 +41,7 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["lib/*", "assets/*"],
+      "resources": ["lib/*", "assets/*", "dashboard/*"],
       "matches": ["<all_urls>"]
     }
   ]
