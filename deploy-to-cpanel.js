@@ -60,13 +60,14 @@ async function zipExtension() {
     
     archive.pipe(output);
     
-    // Add files to the archive
-    archive.directory('manifest.json', 'manifest.json');
-    archive.directory('background.js', 'background.js');
-    archive.directory('popup/', 'popup');
-    archive.directory('content/', 'content');
-    archive.directory('lib/', 'lib');
-    archive.directory('assets/', 'assets');
+   // Add files to the archive
+archive.file('manifest.json', { name: 'manifest.json' });
+archive.file('background.js', { name: 'background.js' });
+archive.directory('popup/', 'popup');
+archive.directory('content/', 'content');
+archive.directory('lib/', 'lib');
+archive.directory('assets/', 'assets');
+archive.directory('dashboard/', 'dashboard'); // Add the dashboard directory
     
     archive.finalize();
   });
