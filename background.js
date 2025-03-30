@@ -8,7 +8,7 @@
 // lib/solana-web3.js and lib/web3.min.js
 
 // Configuration
-const NFT_MINT_ADDRESS = "FKZQGsckXUSEmSkoRgPzWgWh1owVkzxXn4ZtYPNPFc1v"; // Replace with actual Megapixel Core NFT mint address
+const NFT_MINT_ADDRESS = "5LjKf5TZs4cdwkhraeufmdpPWVjrGYygTBUUjd4EA6Vw"; // Glitch Gang NFT
 const SOLANA_RPC_URL = "https://api.mainnet-beta.solana.com";
 const VERSION = "1.0.0";
 const DEFAULT_SETTINGS = {
