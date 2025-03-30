@@ -525,6 +525,31 @@ input:checked + .slider:before {
   background-color: rgba(255, 255, 255, 0.05);
 }
 
+/* Dashboard Button */
+.dashboard-button-container {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.primary-button {
+  background: linear-gradient(135deg, #00f2ff, #33ff99);
+  color: #0d1117;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 10px rgba(51, 255, 153, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.primary-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 15px rgba(51, 255, 153, 0.7);
+}
+
 /* Buttons */
 .secondary-button {
   width: 100%;
