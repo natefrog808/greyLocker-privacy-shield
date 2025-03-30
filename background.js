@@ -156,76 +156,27 @@ function updateBlockedCount(incrementBy = 1) {
 // Connect wallet function
 async function connectWallet(walletType) {
   try {
-    // Handle different wallet types
-    if (walletType === 'phantom') {
-      // Check if Phantom is installed
-      const provider = window.solana;
-      if (!provider) {
-        throw new Error("Phantom wallet not found. Please install it.");
-      }
-      
-      // Connect to the wallet
-      const response = await provider.connect();
-      walletAddress = response.publicKey.toString();
-      
-      // Store wallet address
-      chrome.storage.local.set({ walletAddress });
-      
-      // Verify NFT ownership
-      const hasNFT = await verifyNFTOwnership(walletAddress);
-      const currentTime = Date.now();
-      
-      // Store access status and verification time
-      chrome.storage.local.set({ 
-        hasAccess: hasNFT,
-        lastVerification: currentTime
-      });
-      
-      hasAccessToken = hasNFT;
-      updateExtensionBadge(hasNFT);
-      
-      return { connected: true, wallet: walletAddress, hasAccess: hasNFT };
-    } else if (walletType === 'solflare') {
-      // Check if Solflare is installed
-      const provider = window.solflare;
-      if (!provider) {
-        throw new Error("Solflare wallet not found. Please install it.");
-      }
-      
-      // Connect to the wallet
-      await provider.connect();
-      walletAddress = provider.publicKey.toString();
-      
-      // Store wallet address
-      chrome.storage.local.set({ walletAddress });
-      
-      // Verify NFT ownership
-      const hasNFT = await verifyNFTOwnership(walletAddress);
-      const currentTime = Date.now();
-      
-      // Store access status and verification time
-      chrome.storage.local.set({ 
-        hasAccess: hasNFT,
-        lastVerification: currentTime
-      });
-      
-      hasAccessToken = hasNFT;
-      updateExtensionBadge(hasNFT);
-      
-      return { connected: true, wallet: walletAddress, hasAccess: hasNFT };
-    }
-    
-    return { connected: false, error: "Unsupported wallet type" };
+    // Instead of trying to connect directly from the background script,
+    // we'll handle the actual connection in the popup script
+    // and just store the result here
+    // Return a message to the popup that it needs to handle the wallet connection
+    return { needsPopupConnection: true, walletType };
   } catch (error) {
-    console.error("Error connecting wallet:", error);
+    console.error("Error preparing wallet connection:", error);
     return { connected: false, error: error.message };
   }
 }
 
-// Verify NFT ownership
+// Verify NFT ownership - this happens after the popup has connected the wallet
 async function verifyNFTOwnership(address) {
   try {
     // Connect to Solana network
+    // Import solanaWeb3 directly
+    const solanaWeb3 = self.solanaWeb3;
+    if (!solanaWeb3) {
+      console.error("solanaWeb3 not found. Make sure it's properly imported.");
+      return false;
+    }
     const connection = new solanaWeb3.Connection(SOLANA_RPC_URL);
     
     // Get all token accounts for the wallet
@@ -240,7 +191,7 @@ async function verifyNFTOwnership(address) {
       const mintAddress = tokenInfo.mint;
       const amount = tokenInfo.tokenAmount.uiAmount;
       
-      // Check if this token is the Megapixel Core NFT and owner has at least 1
+      // Check if this token is the Glitch Gang NFT and owner has at least 1
       if (mintAddress === NFT_MINT_ADDRESS && amount > 0) {
         console.log("NFT verified, granting access!");
         return true;
@@ -261,6 +212,30 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     connectWallet(message.walletType)
       .then(response => sendResponse(response))
       .catch(error => sendResponse({ connected: false, error: error.message }));
+    return true; // Indicates async response
+  }
+  
+  if (message.action === "verifyNFTOwnership") {
+    // This is a new message type for when the popup has connected the wallet
+    verifyNFTOwnership(message.address)
+      .then(hasNFT => {
+        // Store wallet address
+        walletAddress = message.address;
+        
+        // Store access status and verification time
+        const currentTime = Date.now();
+        chrome.storage.local.set({ 
+          walletAddress: message.address,
+          hasAccess: hasNFT,
+          lastVerification: currentTime
+        });
+        
+        hasAccessToken = hasNFT;
+        updateExtensionBadge(hasNFT);
+        
+        sendResponse({ hasAccess: hasNFT });
+      })
+      .catch(error => sendResponse({ hasAccess: false, error: error.message }));
     return true; // Indicates async response
   }
   
