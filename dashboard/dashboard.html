@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GreyLocker Privacy Shield</title>
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <div class="overlay"></div>
+  <div class="scanline"></div>
+  <div class="terminal-effect"></div>
+  <div class="glow-effect"></div>
+  
+  <div class="container">
+    <div class="sidebar">
+      <div class="logo">
+        <div class="logo-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+            <!-- Background gradient -->
+            <defs>
+              <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#171b26" />
+                <stop offset="100%" stop-color="#0d1117" />
+              </linearGradient>
+              
+              <!-- Lock body gradient -->
+              <linearGradient id="lock-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#00f2ff" />
+                <stop offset="100%" stop-color="#33ff99" />
+              </linearGradient>
+              
+              <!-- Glow filter -->
+              <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="2" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+              </filter>
+              
+              <!-- Inner glow for lock -->
+              <filter id="inner-glow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="3" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+              </filter>
+            </defs>
+            
+            <!-- Base circle -->
+            <circle cx="64" cy="64" r="60" fill="url(#bg-gradient)" />
+            <circle cx="64" cy="64" r="58" fill="none" stroke="#33ff99" stroke-width="1" stroke-opacity="0.2" />
+            <circle cx="64" cy="64" r="54" fill="none" stroke="#00f2ff" stroke-width="1" stroke-opacity="0.2" />
+            
+            <!-- Shield shape -->
+            <path d="M64 20 C40 30, 30 45, 30 70 C30 90, 45 100, 64 108 C83 100, 98 90, 98 70 C98 45, 88 30, 64 20 Z" 
+                  fill="none" stroke="url(#lock-gradient)" stroke-width="2.5" filter="url(#glow)" />
+            
+            <!-- Lock body -->
+            <rect x="43" y="54" width="42" height="34" rx="8" fill="url(#lock-gradient)" filter="url(#inner-glow)" />
+            
+            <!-- Lock shackle -->
+            <path d="M55 54 L55 42 C55 35, 60 30, 64 30 C68 30, 73 35, 73 42 L73 54" 
+                  fill="none" stroke="url(#lock-gradient)" stroke-width="6" stroke-linecap="round" filter="url(#glow)" />
+            
+            <!-- Keyhole -->
+            <circle cx="64" cy="68" r="6" fill="#0d1117" />
+            <path d="M64 74 L64 80" stroke="#0d1117" stroke-width="4" stroke-linecap="round" />
+            
+            <!-- Digital circuit lines -->
+            <path d="M30 58 L38 58" stroke="#00f2ff" stroke-width="1" />
+            <path d="M30 70 L38 70" stroke="#33ff99" stroke-width="1" />
+            <path d="M90 58 L98 58" stroke="#00f2ff" stroke-width="1" />
+            <path d="M90 70 L98 70" stroke="#33ff99" stroke-width="1" />
+            
+            <!-- Digital dots -->
+            <circle cx="38" cy="58" r="1.5" fill="#00f2ff" />
+            <circle cx="38" cy="70" r="1.5" fill="#33ff99" />
+            <circle cx="90" cy="58" r="1.5" fill="#00f2ff" />
+            <circle cx="90" cy="70" r="1.5" fill="#33ff99" />
+            <circle cx="55" cy="116" r="1.5" fill="#00f2ff" />
+            <circle cx="73" cy="116" r="1.5" fill="#00f2ff" />
+            <circle cx="64" cy="116" r="1.5" fill="#33ff99" />
+          </svg>
+        </div>
+        <div class="logo-text">
+          <div class="logo-title">GreyLocker</div>
+          <div class="logo-subtitle">Privacy Shield</div>
+        </div>
+      </div>
+      
+      <div class="status">
+        <div class="status-indicator"></div>
+        <div class="status-text">SHIELD ACTIVE</div>
+      </div>
+      
+      <div class="wallet-info">
+        <div class="wallet-label">CONNECTED WALLET</div>
+        <div class="wallet-address">
+          7Xf3...kR9p
+          <button class="copy-button">⧉</button>
+        </div>
+      </div>
+      
+      <div class="stats">
+        <div class="stat-box">
+          <div class="stat-value">147</div>
+          <div class="stat-label">Trackers Blocked</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value">12</div>
+          <div class="stat-label">Fingerprints Masked</div>
+        </div>
+      </div>
+      
+      <div class="navigation">
+        <button class="nav-button active">
+          <span class="nav-icon">⚡</span>
+          Dashboard
+        </button>
+        <button class="nav-button">
+          <span class="nav-icon">🛡️</span>
+          Protection Matrix
+        </button>
+        <button class="nav-button">
+          <span class="nav-icon">📊</span>
+          Analytics
+        </button>
+        <button class="nav-button">
+          <span class="nav-icon">⚙️</span>
+          Settings
+        </button>
+      </div>
+    </div>
+    
+    <div class="main-content">
+      <div class="matrix-bg"></div>
+      <div class="grid-animation"></div>
+      
+      <div class="header">
+        <div class="page-title">
+          <span class="title-icon">⚡</span>
+          Digital Fortress // Command Deck
+        </div>
+        <div class="header-actions">
+          <button class="action-button">
+            <span class="action-icon">🔄</span>
+            Reset Stats
+          </button>
+          <button class="action-button">
+            <span class="action-icon">🔒</span>
+            Lock Down Mode
+          </button>
+        </div>
+      </div>
+      
+      <div class="content">
+        <div class="feature-group">
+          <div class="feature-group-header">
+            <div class="feature-group-title">
+              <span class="group-title-icon">🛡️</span>
+              Core Shield Matrix
+            </div>
+          </div>
+          
+          <div class="feature-list">
+            <div class="feature-item">
+              <div class="feature-info">
+                <div class="feature-name">
+                  <span class="feature-icon">🔥</span>
+                  Tracker Blocking
+                </div>
+                <div class="feature-description">Vaporizes corporate spyware before it can transmit your datastream</div>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            
+            <div class="feature-item">
+              <div class="feature-info">
+                <div class="feature-name">
+                  <span class="feature-icon">👻</span>
+                  Phantom Presence Engine
+                </div>
+                <div class="feature-description">Renders your digital identity as an ever-shifting ghost</div>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            
+            <div class="feature-item">
+              <div class="feature-info">
+                <div class="feature-name">
+                  <span class="feature-icon">🔒</span>
+                  HTTPS Upgrade
+                </div>
+                <div class="feature-description">Forces secure connections when available</div>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            
+            <div class="feature-item">
+              <div class="feature-info">
+                <div class="feature-name">
+                  <span class="feature-icon">📡</span>
+                  Header Protection
+                </div>
+                <div class="feature-description">Rebuilds request headers in real-time, leaving only ghosted trails</div>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+        
+        <div class="feature-group">
+          <div class="feature-group-header">
+            <div class="feature-group-title">
+              <span class="group-title-icon">🧠</span>
+              Advanced Countermeasures
+            </div>
+          </div>
+          
+          <div class="feature-list">
+            <div class="feature-item">
+              <div class="feature-info">
+                <div class="feature-name">
+                  <span class="feature-icon">🎨</span>
+                  Canvas Protection
+                </div>
+                <div class="feature-description">Prevent canvas-based fingerprinting with subtle noise injection</div>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            
+            <div class="feature-item">
+              <div class="feature-info">
+                <div class="feature-name">
+                  <span class="feature-icon">🎮</span>
+                  WebGL Projection Scrambler
+                </div>
+                <div class="feature-description">Distorts graphical fingerprinting while preserving visual integrity</div>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            
+            <div class="feature-item">
+              <div class="feature-info">
+                <div class="feature-name">
+                  <span class="feature-icon">🔊</span>
+                  Quantum Audio Shield
+                </div>
+                <div class="feature-description">Disrupts soundprint tracking with subtle noise injection</div>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            
+            <div class="feature-item">
+              <div class="feature-info">
+                <div class="feature-name">
+                  <span class="feature-icon">🔤</span>
+                  Font Protection
+                </div>
+                <div class="feature-description">Prevents font enumeration tracking with allowlisting</div>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            
+            <div class="feature-item">
+              <div class="feature-info">
+                <div class="feature-name">
+                  <span class="feature-icon">⏱️</span>
+                  Temporal Disruption Field
+                </div>
+                <div class="feature-description">Obfuscates high-precision timing attacks used for identification</div>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            
+            <div class="feature-item">
+              <div class="feature-info">
+                <div class="feature-name">
+                  <span class="feature-icon">💾</span>
+                  Storage Vault Defender
+                </div>
+                <div class="feature-description">Prevents fingerprinting via localStorage and IndexedDB</div>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+        
+        <div class="logs-panel">
+          <div class="logs-header">
+            <div class="logs-title">
+              <span class="logs-title-icon">💻</span>
+              SYSTEM LOGS
+            </div>
+          </div>
+          <div class="logs-content">
+            <div class="log-entry">
+              <span class="log-time">16:42:03</span>
+              <span class="log-status info">[INFO]</span>
+              <span class="log-message">GreyLocker Privacy Shield v1.0.0 initialized</span>
+            </div>
+            <div class="log-entry">
+              <span class="log-time">16:42:05</span>
+              <span class="log-status info">[INFO]</span>
+              <span class="log-message">Establishing secure connection to Solana mainnet...</span>
+            </div>
+            <div class="log-entry">
+              <span class="log-time">16:42:08</span>
+              <span class="log-status success">[SUCCESS]</span>
+              <span class="log-message">Wallet connected: 7Xf3...kR9p</span>
+            </div>
+            <div class="log-entry">
+              <span class="log-time">16:42:10</span>
+              <span class="log-status info">[INFO]</span>
+              <span class="log-message">Verifying Megapixel Core NFT ownership...</span>
+            </div>
+            <div class="log-entry">
+              <span class="log-time">16:42:13</span>
+              <span class="log-status success">[SUCCESS]</span>
+              <span class="log-message">NFT verified, access granted!</span>
+            </div>
+            <div class="log-entry">
+              <span class="log-time">16:42:15</span>
+              <span class="log-status info">[INFO]</span>
+              <span class="log-message">Deploying Privacy Shield Matrix...</span>
+            </div>
+            <div class="log-entry">
+              <span class="log-time">16:42:18</span>
+              <span class="log-status success">[SUCCESS]</span>
+              <span class="log-message">All protection vectors engaged</span>
+            </div>
+            <div class="log-entry">
+              <span class="log-time">16:43:22</span>
+              <span class="log-status warn">[BLOCK]</span>
+              <span class="log-message">Blocked tracker: google-analytics.com/analytics.js</span>
+            </div>
+            <div class="log-entry">
+              <span class="log-time">16:44:05</span>
+              <span class="log-status warn">[BLOCK]</span>
+              <span class="log-message">Blocked tracker: facebook.net/fbevents.js</span>
+            </div>
+            <div class="log-entry">
+              <span class="log-time">16:44:38</span>
+              <span class="log-status info">[MASK]</span>
+              <span class="log-message">Canvas fingerprinting attempt detected and neutralized</span>
+            </div>
+            <div class="log-entry">
+              <span class="log-time">16:45:12</span>
+              <span class="log-status warn">[BLOCK]</span>
+              <span class="log-message">Blocked tracker: doubleclick.net/pixel.gif</span>
+            </div>
+            <div class="log-entry">
+              <span class="log-time">16:46:27</span>
+              <span class="log-status info">[MASK]</span>
+              <span class="log-message">WebGL fingerprinting attempt detected and neutralized</span>
+            </div>
+            <div class="log-entry">
+              <span class="log-time">16:47:03</span>
+              <span class="log-status info">[UPGRADE]</span>
+              <span class="log-message">HTTP connection upgraded to HTTPS</span>
+            </div>
+            <div class="log-entry">
+              <span class="log-time">16:48:19</span>
+              <span class="log-status warn">[BLOCK]</span>
+              <span class="log-message">Blocked tracker: hotjar.com/hotjar.js</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="footer">
+        <div class="version">
+          <span class="version-icon">⚡</span>
+          GreyLocker v1.0.0
+        </div>
+        <div class="footer-links">
+          <a href="#">Documentation</a>
+          <a href="#">GitHub</a>
+          <a href="#">Support</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="floating-elements">
+    <div class="floating-element floating-1">01</div>
+    <div class="floating-element floating-2">10</div>
+    <div class="floating-element floating-3">01</div>
+  </div>
+  
+  <script src="dashboard.js"></script>
+</body>
+</html>
