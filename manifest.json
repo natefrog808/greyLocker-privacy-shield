@@ -35,8 +35,10 @@
     }
   ],
   "icons": {
-    "16": "assets/icons/greylocker-icon.svg",
-  },
+  "16": "assets/icons/generate-icons.svg",
+  "48": "assets/icons/generate-icons.svg",
+  "128": "assets/icons/generate-icons.svg"
+}
   "web_accessible_resources": [
     {
       "resources": ["lib/*", "assets/*", "dashboard/*"],
