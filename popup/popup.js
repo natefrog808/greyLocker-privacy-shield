@@ -121,20 +121,72 @@ function checkWalletConnection() {
 function connectWallet(walletType) {
   updateUIState('connecting');
   
+  // First, check with background script
   chrome.runtime.sendMessage(
     { action: 'connectWallet', walletType },
     (response) => {
-      if (!response) {
+      if (response.needsPopupConnection) {
+        // Now handle the actual wallet connection in the popup
+        if (walletType === 'phantom') {
+          // Check if Phantom is installed
+          if (!window.solana) {
+            updateUIState('error', null, "Phantom wallet not found. Please install it.");
+            return;
+          }
+          
+          // Connect to the wallet
+          window.solana.connect()
+            .then(response => {
+              const walletAddress = response.publicKey.toString();
+              // Verify the NFT ownership via background script
+              chrome.runtime.sendMessage(
+                { action: 'verifyNFTOwnership', address: walletAddress },
+                (verifyResponse) => {
+                  if (verifyResponse.hasAccess) {
+                    updateUIState('verified', walletAddress);
+                  } else {
+                    updateUIState('failed', walletAddress);
+                  }
+                }
+              );
+            })
+            .catch(error => {
+              console.error("Error connecting to Phantom:", error);
+              updateUIState('error', null, error.message || "Failed to connect to Phantom");
+            });
+        } 
+        else if (walletType === 'solflare') {
+          // Check if Solflare is installed
+          if (!window.solflare) {
+            updateUIState('error', null, "Solflare wallet not found. Please install it.");
+            return;
+          }
+          
+          // Connect to the wallet
+          window.solflare.connect()
+            .then(() => {
+              const walletAddress = window.solflare.publicKey.toString();
+              // Verify the NFT ownership via background script
+              chrome.runtime.sendMessage(
+                { action: 'verifyNFTOwnership', address: walletAddress },
+                (verifyResponse) => {
+                  if (verifyResponse.hasAccess) {
+                    updateUIState('verified', walletAddress);
+                  } else {
+                    updateUIState('failed', walletAddress);
+                  }
+                }
+              );
+            })
+            .catch(error => {
+              console.error("Error connecting to Solflare:", error);
+              updateUIState('error', null, error.message || "Failed to connect to Solflare");
+            });
+        }
+      } else if (!response) {
         console.error("Failed to connect wallet");
         updateUIState('error', null, "Connection failed");
-        return;
-      }
-      
-      if (response.connected && response.hasAccess) {
-        updateUIState('verified', response.wallet);
-      } else if (response.connected && !response.hasAccess) {
-        updateUIState('failed', response.wallet);
-      } else {
+      } else if (response.error) {
         updateUIState('error', null, response.error);
         setTimeout(() => {
           updateUIState('disconnected');
