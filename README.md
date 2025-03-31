@@ -13,7 +13,7 @@ _____                _              _
 
 ## UPLOAD TO THE GRID: YOUR DIGITAL FORTRESS AWAITS
 
-In a world where megacorps harvest your digital pulse with every click, GreyLocker Privacy Shield rises like a neon specter in the night—a chrome-plated guardian against the all-seeing eye. This isn't just another extension; it's your digital fortress in the endless datastream, accessible only to the chosen few who possess the Megapixel Core NFT—your cryptographic key to the shadows.
+In a world where megacorps harvest your digital pulse with every click, GreyLocker Privacy Shield rises like a neon specter in the night—a chrome-plated guardian against the all-seeing eye. This isn't just another extension; it's your digital fortress in the endless datastream, accessible only to the chosen few who possess the Quantum Key NFT—your cryptographic key to the shadows.
 
 Jack in. The grid awaits.
 
