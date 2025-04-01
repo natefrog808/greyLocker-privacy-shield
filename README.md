@@ -127,7 +127,7 @@ GreyLocker operates on five critical subroutines:
 
 1. **VERIFICATION PROTOCOL**
    - Establishes secure connection to Solana mainnet
-   - Verifies Megapixel Core NFT ownership through cryptographic proof
+   - Verifies QKEY or Glitch Gang NFT ownership through cryptographic proof
    - Creates secure session token for continued operation
    - Periodic re-verification with minimal blockchain interaction
 
@@ -220,13 +220,13 @@ The core development team will review your code for integration into the mainfra
 
 GreyLocker was forged in the digital fires by a collective of netrunners dedicated to preserving the last shreds of privacy in an overexposed world. The team remains in the shadows, known only by their handles:
 
-- **ShadowByte** — Core Architecture
-- **NeonPhantom** — Solana Integration
-- **CipherPulse** — Privacy Algorithms
-- **VoidRaven** — UI/UX Design
-- **QuantumGhost** — Fingerprint Countermeasures
-- **EchoSilence** — Audio Protection Systems
-- **PixelShift** — Canvas/WebGL Defense Matrix
+- **Natefrog** — Core Architecture
+- **Phantom** — Solana Integration
+- **Ciph** — Privacy Algorithms
+- **HashMonkey** — UI/UX Design
+- **QGhost** — Fingerprint Countermeasures
+- **Echo** — Audio Protection Systems
+- **Pixel** — Canvas/WebGL Defense Matrix
 
 *"We don't build tools. We build fortresses."*
 
