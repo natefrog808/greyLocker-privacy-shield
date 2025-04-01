@@ -2,13 +2,13 @@
   "manifest_version": 3,
   "name": "GreyLocker Privacy Shield",
   "version": "1.0.0",
-  "description": "A privacy-focused browser extension for Megapixel Core NFT holders",
+  "description": "A privacy-focused browser extension for Glitch Gang and Quantum Key NFT holders",
   "permissions": [
     "storage",
     "tabs",
-    "webRequest",
-    "webRequestBlocking",
     "scripting",
+    "declarativeNetRequest",
+    "webNavigation",
     "notifications",
     "clipboardWrite"
   ],
@@ -21,9 +21,9 @@
   "action": {
     "default_popup": "popup/popup.html",
     "default_icon": {
-      "16": "assets/icons/icon16.png",
-      "48": "assets/icons/icon48.png",
-      "128": "assets/icons/icon128.png"
+      "16": "assets/icons/icon16.svg",
+      "48": "assets/icons/icon48.svg",
+      "128": "assets/icons/icon128.svg"
     },
     "default_title": "GreyLocker Privacy Shield"
   },
@@ -35,14 +35,23 @@
     }
   ],
   "icons": {
-  "16": "assets/icons/generate-icons.svg",
-  "48": "assets/icons/generate-icons.svg",
-  "128": "assets/icons/generate-icons.svg"
-}
+    "16": "assets/icons/icon16.svg",
+    "48": "assets/icons/icon48.svg",
+    "128": "assets/icons/icon128.svg"
+  },
   "web_accessible_resources": [
     {
       "resources": ["lib/*", "assets/*", "dashboard/*"],
       "matches": ["<all_urls>"]
     }
-  ]
+  ],
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "ruleset_1",
+        "enabled": true,
+        "path": "rules/rules.json"
+      }
+    ]
+  }
 }
