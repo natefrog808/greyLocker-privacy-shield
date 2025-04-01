@@ -116,6 +116,7 @@ function initialize() {
       
       // Confirm update
       sendResponse({ success: true });
+      return true;
     }
     
     if (message.action === 'checkProtectionStatus') {
@@ -124,12 +125,14 @@ function initialize() {
         trackerBlockCount,
         url: window.location.href
       });
+      return true;
     }
     
     // For debugging - toggle performance logging
     if (message.action === 'toggleDebug') {
       performanceDebug = message.enabled;
       sendResponse({ debug: performanceDebug });
+      return true;
     }
   });
   
@@ -229,18 +232,20 @@ function registerDynamicContentObserver() {
       if (mutation.type === 'childList') {
         // Check for newly added scripts, iframes, or images
         mutation.addedNodes.forEach(node => {
-          if (node.tagName === 'SCRIPT' || node.tagName === 'IFRAME' || node.tagName === 'IMG') {
-            const isTracker = checkAndBlockTracker(node);
-            if (isTracker) trackersFound = true;
-          }
-          
-          // Also check children of added nodes (like divs containing scripts)
-          if (node.querySelectorAll) {
-            const trackerElements = node.querySelectorAll('script[src], iframe[src], img[src]');
-            trackerElements.forEach(element => {
-              const isTracker = checkAndBlockTracker(element);
+          if (node.nodeType === 1) { // Element node
+            if (node.tagName === 'SCRIPT' || node.tagName === 'IFRAME' || node.tagName === 'IMG') {
+              const isTracker = checkAndBlockTracker(node);
               if (isTracker) trackersFound = true;
-            });
+            }
+            
+            // Also check children of added nodes (like divs containing scripts)
+            if (node.querySelectorAll) {
+              const trackerElements = node.querySelectorAll('script[src], iframe[src], img[src]');
+              trackerElements.forEach(element => {
+                const isTracker = checkAndBlockTracker(element);
+                if (isTracker) trackersFound = true;
+              });
+            }
           }
         });
       }
@@ -340,7 +345,7 @@ function blockTrackers() {
     });
     
     // Block tracker iframes
-    const iframes = document.querySelectorAll('iframe');
+    const iframes = document.querySelectorAll('iframe[src]');
     iframes.forEach(iframe => {
       const src = iframe.getAttribute('src');
       if (src && trackingDomains.some(domain => src.includes(domain))) {
@@ -351,7 +356,7 @@ function blockTrackers() {
     });
     
     // Block tracker images/pixels
-    const images = document.querySelectorAll('img');
+    const images = document.querySelectorAll('img[src]');
     images.forEach(img => {
       const src = img.getAttribute('src');
       if (src && trackingDomains.some(domain => src.includes(domain))) {
@@ -631,6 +636,49 @@ function protectCanvas() {
     
     return result;
   };
+  
+  // Also protect toBlob method if available
+  if (HTMLCanvasElement.prototype.toBlob && !HTMLCanvasElement.prototype.toBlob.toString().includes('GreyLockerGuarded')) {
+    originalFunctions.toBlob = HTMLCanvasElement.prototype.toBlob;
+    
+    HTMLCanvasElement.prototype.toBlob = function GreyLockerGuarded_toBlob(callback, type, quality) {
+      // Check if this canvas is likely being used for fingerprinting
+      const isLikelyFingerprint = this.width <= 50 && this.height <= 50;
+      const isTextCanvas = this.width < 300 && this.width > 0 && this.height < 50 && this.height > 0;
+      
+      if (isLikelyFingerprint || isTextCanvas) {
+        // First get the original blob
+        originalFunctions.toBlob.call(this, function(blob) {
+          // For small canvases likely used for fingerprinting, we need to modify the blob
+          // This is complex as we can't directly edit the blob contents
+          // Instead, we'll first convert to data URL, modify that, then convert back to blob
+          const reader = new FileReader();
+          reader.onload = function() {
+            const dataURL = reader.result;
+            const modifiedDataURL = modifyCanvasResult(dataURL);
+            
+            // Convert back to blob
+            const byteString = atob(modifiedDataURL.split(',')[1]);
+            const mimeType = modifiedDataURL.split(',')[0].split(':')[1].split(';')[0];
+            const arrayBuffer = new ArrayBuffer(byteString.length);
+            const uint8Array = new Uint8Array(arrayBuffer);
+            
+            for (let i = 0; i < byteString.length; i++) {
+              uint8Array[i] = byteString.charCodeAt(i);
+            }
+            
+            const modifiedBlob = new Blob([arrayBuffer], { type: mimeType });
+            callback(modifiedBlob);
+          };
+          
+          reader.readAsDataURL(blob);
+        }, type, quality);
+      } else {
+        // For normal canvases, just pass through
+        originalFunctions.toBlob.apply(this, arguments);
+      }
+    };
+  }
 }
 
 /**
@@ -1459,127 +1507,79 @@ function protectNavigator() {
   };
   
   createNavigatorProxy();
-}
-
-/**
- * Apply stealth mode - additional advanced protections
- */
-function applyStealthMode() {
-  // Block Chrome-specific features that can be used for fingerprinting
-  if (window.chrome) {
-    // Create an empty proxy for chrome API objects
-    const createEmptyProxy = (name) => {
-      return new Proxy({}, {
-        get: function(target, name) {
-          if (typeof target[name] === 'undefined') {
-            target[name] = typeof name === 'string' && name !== 'then' ? 
-              createEmptyProxy(`${name}`) : undefined;
-          }
-          return target[name];
+} a fingerprinting attempt
+            if (isFingerprintingKey(key)) {
+              console.log(`Blocked ${storageType} ${prop} for suspected fingerprinting key: ${key}`);
+              
+              // For getItem, return null as if the item doesn't exist
+              if (prop === 'getItem') {
+                return null;
+              }
+              
+              // For setItem, return undefined (normal behavior) but don't actually set
+              return undefined;
+            }
+            
+            // Allow normal storage for non-fingerprinting keys
+            return target[prop].apply(target, arguments);
+          };
         }
-      });
-    };
-    
-    // Replace fingerprinting-heavy chrome APIs with empty proxies
-    window.chrome.csi = createEmptyProxy('csi');
-    window.chrome.loadTimes = createEmptyProxy('loadTimes');
-    
-    // Remove various Chrome fingerprinting vectors
-    if (window.chrome.runtime) {
-      window.chrome.runtime = createEmptyProxy('runtime');
-    }
-  }
-  
-  // Stealth against various detection methods
-  const methods = [
-    // Stealth against iframe detection
-    () => {
-      // Make it harder to detect if this is running in an iframe
-      if (window !== window.top) {
-        // Make window.frameElement return null as if from different origin
-        Object.defineProperty(window, 'frameElement', {
-          get: () => null
-        });
+        
+        // For other methods/properties, pass through to the original
+        return target[prop];
       }
-    },
+    });
+  };
+  
+  // Apply protection to both storage types
+  createStorageProxy('localStorage');
+  createStorageProxy('sessionStorage');
+  
+  // If IndexedDB is available, protect that too
+  if (window.indexedDB) {
+    originalFunctions.indexedDBOpen = window.indexedDB.open;
     
-    // Stealth against automation detection
-    () => {
-      // Remove Automation object if present
-      if (window.Notification && window.Notification.permission) {
-        window.Notification.permission = "default";
+    window.indexedDB.open = function(name, version) {
+      // Block known fingerprinting database names
+      if (isFingerprintingKey(name)) {
+        console.log(`Blocked IndexedDB open for suspected fingerprinting database: ${name}`);
+        
+        // Return a fake request that fires an error event
+        const fakeRequest = {
+          error: new Error('Security Error'),
+          readyState: 'pending',
+          result: null,
+          transaction: null,
+          source: null,
+          onsuccess: null,
+          onerror: null,
+          onblocked: null,
+          onupgradeneeded: null,
+          
+          addEventListener: function(type, listener) {
+            if (type === 'error' && typeof listener === 'function') {
+              // Schedule the error event
+              setTimeout(() => {
+                const errorEvent = new Event('error');
+                errorEvent.target = fakeRequest;
+                listener(errorEvent);
+                
+                // Also trigger onerror if it was set
+                if (typeof this.onerror === 'function') {
+                  this.onerror(errorEvent);
+                }
+              }, 0);
+            }
+          },
+          
+          removeEventListener: function() {}
+        };
+        
+        return fakeRequest;
       }
       
-      // Remove webdriver flag
-      if (navigator.webdriver === true) {
-        navigator.__defineGetter__('webdriver', function() {
-          return undefined;
-        });
-      }
-    },
-    
-    // Hide extension from feature detection
-    () => {
-      const actualHasOwnProperty = Object.prototype.hasOwnProperty;
-      Object.prototype.hasOwnProperty = function(property) {
-        // Make it harder to detect if this is running in a Chrome extension
-        if (property === 'runtime' || 
-            property === 'webstore' ||
-            property === '_shieldInitialized' ||
-            property === '_greyLockerShield') {
-          return false;
-        }
-        return actualHasOwnProperty.call(this, property);
-      };
-    }
-  ];
-  
-  // Apply all stealth methods
-  methods.forEach(method => {
-    try {
-      method();
-    } catch (e) {
-      console.error('Error applying stealth method:', e);
-    }
-  });
-}
-
-/**
- * Upgrade HTTP connections to HTTPS
- */
-function upgradeToHttps() {
-  if (window.location.protocol === 'http:' && window.location.hostname !== 'localhost') {
-    // Ignore common local development hosts
-    if (!window.location.hostname.includes('127.0.0.1') && 
-        !window.location.hostname.includes('::1') &&
-        !window.location.hostname.includes('.local')) {
-      window.location.href = window.location.href.replace('http:', 'https:');
-    }
+      // Allow non-fingerprinting databases
+      return originalFunctions.indexedDBOpen.apply(window.indexedDB, arguments);
+    };
   }
 }
-
-/**
- * Insert a visual indicator for debugging
- */
-function insertDebugIndicator() {
-  // Create a small indicator that's only visible in debug mode
-  const indicator = document.createElement('div');
-  
-  indicator.style.position = 'fixed';
-  indicator.style.bottom = '5px';
-  indicator.style.right = '5px';
-  indicator.style.width = '10px';
-  indicator.style.height = '10px';
-  indicator.style.borderRadius = '50%';
-  indicator.style.backgroundColor = '#33ff99';
-  indicator.style.boxShadow = '0 0 5px #33ff99';
-  indicator.style.zIndex = '999999999';
-  indicator.style.opacity = '0.7';
-  
-  indicator.title = `GreyLocker Shield Active - ${trackerBlockCount} trackers blocked`;
-  
-  document.body.appendChild(indicator);
-}
-
-// Initialize the content script
-initialize();
