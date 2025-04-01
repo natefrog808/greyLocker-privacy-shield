@@ -16,13 +16,13 @@ GreyLocker-Privacy-Shield/
 │
 ├── assets/                    # Static assets
 │   ├── icons/                 # Extension icons
-│   │   ├── icon16.png         # 16x16 icon
-│   │   ├── icon48.png         # 48x48 icon
-│   │   └── icon128.png        # 128x128 icon
+│   │   ├── icon16.svg         # 16x16 icon
+│   │   ├── icon48.svg         # 48x48 icon
+│   │   └── icon128.svg        # 128x128 icon
 │   │
 │   └── wallets/               # Wallet icons
-│       ├── phantom.png        # Phantom wallet logo
-│       └── solflare.png       # Solflare wallet logo
+│       ├── phantom.svg        # Phantom wallet logo
+│       └── solflare.svg       # Solflare wallet logo
 │
 ├── popup/                     # Extension popup UI
 │   ├── popup.html             # Popup HTML structure
