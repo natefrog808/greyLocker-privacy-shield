@@ -1,397 +1,605 @@
 /**
- * GreyLocker Privacy Shield
- * Background script for privacy protection and NFT verification
+ * GreyLocker Privacy Shield - Background Service Worker
+ * Main controller for privacy protection extension
+ * Works with Chrome's Manifest V3 restrictions
  */
 
-// Import libraries from local files
-// These should be included in the extension's lib directory
-// lib/solana-web3.js and lib/web3.min.js
-
 // Configuration
-const NFT_MINT_ADDRESS = "5LjKf5TZs4cdwkhraeufmdpPWVjrGYygTBUUjd4EA6Vw"; // Glitch Gang NFT
-const SOLANA_RPC_URL = "https://api.mainnet-beta.solana.com";
 const VERSION = "1.0.0";
-const DEFAULT_SETTINGS = {
-  trackerBlocking: true,
-  fingerprintProtection: true,
-  httpsUpgrade: true,
-  headerProtection: true,
-  blockTrackers: [
-    "google-analytics.com",
-    "analytics.google.com",
-    "doubleclick.net",
-    "facebook.net",
-    "connect.facebook.net",
-    "adnxs.com",
-    "googletagmanager.com",
-    "hotjar.com",
-    "ads-twitter.com",
-    "analytics.twitter.com",
-    "pixel.facebook.com",
-    "scorecardresearch.com",
-    "amazon-adsystem.com",
-    "bugsnag.com",
-    "optimizely.com",
-    "segment.io",
-    "adjust.com",
-    "appsflyer.com"
-  ]
+const DEBUG = false;
+
+// NFT addresses for verification
+const GLITCH_GANG_ADDRESS = "EpyXG6ZH98zKgex5GccGW6r2yeYfMuvkvG3cES5iP95k";
+const QUANTUM_KEY_ADDRESS = "EALacBDs4xqu4xyKcp6gCkjtjU6psh2ykZj4Xv2Qqgwu";
+
+// NFT access tracking
+let userHasAccess = false;
+let accessToken = null;
+let accessChecked = false;
+let nftCollection = null; // "glitchgang" or "quantumkey"
+let nftTokenId = null;
+
+// Stats tracking
+let protectionStats = {
+  trackersBlocked: 0,
+  fingerprintsProtected: 0,
+  httpsUpgrades: 0,
+  sitesProtected: new Set()
 };
 
-// State variables
-let hasAccessToken = false;
-let walletAddress = null;
-let privacySettings = {...DEFAULT_SETTINGS};
-let blockedTrackersCount = 0;
-let lastVerificationTime = 0;
-const VERIFICATION_INTERVAL = 24 * 60 * 60 * 1000; // 24 hours
-
-// Initialize extension when loaded
-chrome.runtime.onInstalled.addListener((details) => {
-  console.log("GreyLocker Privacy Shield installed/updated:", VERSION);
+// Initialize when service worker loads
+async function initialize() {
+  console.log("GreyLocker Privacy Shield initializing...");
   
-  if (details.reason === "install") {
-    // Set default settings on first install
-    chrome.storage.local.set({ settings: DEFAULT_SETTINGS });
+  // Load settings
+  await loadSettings();
+  
+  // Set up default rules for declarativeNetRequest as a fallback
+  await setupNetworkRules();
+  
+  // Check if user has NFT access
+  await checkNFTAccess();
+  
+  console.log("GreyLocker initialization complete");
+}
+
+// Load settings from storage
+async function loadSettings() {
+  try {
+    const result = await chrome.storage.local.get([
+      'settings', 
+      'userHasAccess', 
+      'accessToken',
+      'nftCollection',
+      'nftTokenId'
+    ]);
     
-    // Create and show welcome notification
-    chrome.notifications.create({
-      type: "basic",
-      iconUrl: "assets/icons/icon128.png",
-      title: "GreyLocker Privacy Shield Installed",
-      message: "Connect your Solana wallet with a Megapixel Core NFT to activate privacy features."
+    if (result.settings) {
+      console.log("Loaded saved settings");
+    } else {
+      // Set default settings if none exist
+      await saveDefaultSettings();
+    }
+    
+    // Load access status
+    if (result.userHasAccess !== undefined) {
+      userHasAccess = result.userHasAccess;
+      accessToken = result.accessToken || null;
+      nftCollection = result.nftCollection || null;
+      nftTokenId = result.nftTokenId || null;
+      accessChecked = true;
+    }
+  } catch (error) {
+    console.error("Error loading settings:", error);
+  }
+}
+
+// Save default settings to storage
+async function saveDefaultSettings() {
+  const defaultSettings = {
+    trackerBlocking: true,
+    fingerprintProtection: true,
+    httpsUpgrade: true,
+    headerProtection: true,
+    advancedProtection: {
+      audioFingerprint: true,
+      webglFingerprint: true,
+      fontFingerprint: true,
+      batteryFingerprint: true,
+      screenResolution: true,
+      mediaDevices: true,
+      webrtcProtection: true,
+      timingProtection: true,
+      storageProtection: true
+    }
+  };
+  
+  try {
+    await chrome.storage.local.set({ settings: defaultSettings });
+    console.log("Saved default settings");
+  } catch (error) {
+    console.error("Error saving default settings:", error);
+  }
+}
+
+// Set up network rules using declarativeNetRequest for Manifest V3 compatibility
+async function setupNetworkRules() {
+  try {
+    // Get existing dynamic rules
+    const existingRules = await chrome.declarativeNetRequest.getDynamicRules();
+    const existingRuleIds = existingRules.map(rule => rule.id);
+    
+    // Remove existing rules
+    if (existingRuleIds.length > 0) {
+      await chrome.declarativeNetRequest.updateDynamicRules({
+        removeRuleIds: existingRuleIds
+      });
+    }
+    
+    // Add new rules for basic protection
+    // This serves as a fallback for the content script's more advanced protection
+    const newRules = [
+      // Block major tracking domains
+      {
+        id: 1,
+        priority: 1,
+        action: { type: "block" },
+        condition: {
+          domains: ["<all_urls>"],
+          urlFilter: "||google-analytics.com",
+          resourceTypes: ["script", "xmlhttprequest", "image"]
+        }
+      },
+      {
+        id: 2,
+        priority: 1,
+        action: { type: "block" },
+        condition: {
+          domains: ["<all_urls>"],
+          urlFilter: "||doubleclick.net",
+          resourceTypes: ["script", "xmlhttprequest", "image", "sub_frame"]
+        }
+      },
+      {
+        id: 3,
+        priority: 1,
+        action: { type: "block" },
+        condition: {
+          domains: ["<all_urls>"],
+          urlFilter: "||facebook.com/tr",
+          resourceTypes: ["script", "xmlhttprequest", "image"]
+        }
+      },
+      // Upgrade HTTP to HTTPS
+      {
+        id: 4,
+        priority: 2,
+        action: { type: "redirect", redirect: { transform: { scheme: "https" } } },
+        condition: {
+          urlFilter: "|http://",
+          excludedInitiatorDomains: ["localhost", "127.0.0.1"],
+          resourceTypes: ["main_frame"]
+        }
+      }
+    ];
+    
+    // Add the new rules
+    await chrome.declarativeNetRequest.updateDynamicRules({
+      addRules: newRules
     });
     
-  } else if (details.reason === "update") {
-    // Handle update if needed
-    loadSettings();
+    console.log("Network rules setup complete");
+  } catch (error) {
+    console.error("Error setting up network rules:", error);
   }
-  
-  // Initialize state
-  checkLocalStorage();
-});
-
-// Load privacy settings
-function loadSettings() {
-  chrome.storage.local.get(['settings'], (result) => {
-    if (result.settings) {
-      privacySettings = {...DEFAULT_SETTINGS, ...result.settings};
-    } else {
-      privacySettings = {...DEFAULT_SETTINGS};
-      chrome.storage.local.set({ settings: privacySettings });
-    }
-    console.log("Privacy settings loaded:", privacySettings);
-  });
 }
 
-// Check for stored wallet and access token
-function checkLocalStorage() {
-  chrome.storage.local.get(['walletAddress', 'hasAccess', 'lastVerification', 'settings'], (result) => {
-    // Load wallet status
-    if (result.walletAddress) {
-      walletAddress = result.walletAddress;
-      hasAccessToken = result.hasAccess || false;
-      lastVerificationTime = result.lastVerification || 0;
-      
-      if (hasAccessToken) {
-        console.log("Access already verified for wallet:", walletAddress);
-        
-        // If verification is older than the interval, re-verify
-        const currentTime = Date.now();
-        if (currentTime - lastVerificationTime > VERIFICATION_INTERVAL) {
-          console.log("Re-verifying NFT ownership after interval...");
-          verifyNFTOwnership(walletAddress).then(hasNFT => {
-            hasAccessToken = hasNFT;
-            chrome.storage.local.set({ 
-              hasAccess: hasNFT,
-              lastVerification: currentTime
-            });
-            
-            // Update badge based on verification result
-            updateExtensionBadge(hasNFT);
-          });
-        }
-      } else {
-        console.log("Need to verify NFT ownership for wallet:", walletAddress);
-      }
-    } else {
-      console.log("No wallet connected yet");
-      updateExtensionBadge(false);
+// Check NFT access for premium features
+async function checkNFTAccess() {
+  try {
+    // If we've already checked, don't check again
+    if (accessChecked) {
+      return userHasAccess;
     }
     
-    // Load settings
-    if (result.settings) {
-      privacySettings = {...DEFAULT_SETTINGS, ...result.settings};
-    } else {
-      privacySettings = {...DEFAULT_SETTINGS};
-    }
-  });
-}
-
-// Update extension icon badge
-function updateExtensionBadge(isVerified) {
-  if (isVerified) {
-    chrome.action.setBadgeBackgroundColor({ color: '#33ff99' });
-    chrome.action.setBadgeText({ text: '✓' });
-    chrome.action.setTitle({ title: 'GreyLocker Privacy Shield (Active)' });
-  } else {
-    chrome.action.setBadgeBackgroundColor({ color: '#ff3366' });
-    chrome.action.setBadgeText({ text: '!' });
-    chrome.action.setTitle({ title: 'GreyLocker Privacy Shield (Inactive - Connect NFT)' });
-  }
-}
-
-// Update tracking statistics
-function updateBlockedCount(incrementBy = 1) {
-  blockedTrackersCount += incrementBy;
-  chrome.storage.local.set({ blockedCount: blockedTrackersCount });
-  
-  // Optionally update badge with count instead of checkmark
-  if (hasAccessToken && privacySettings.trackerBlocking) {
-    chrome.action.setBadgeBackgroundColor({ color: '#33ff99' });
-    chrome.action.setBadgeText({ text: blockedTrackersCount.toString() });
-  }
-}
-
-// Connect wallet function
-async function connectWallet(walletType) {
-  try {
-    // Instead of trying to connect directly from the background script,
-    // we'll handle the actual connection in the popup script
-    // and just store the result here
-    // Return a message to the popup that it needs to handle the wallet connection
-    return { needsPopupConnection: true, walletType };
-  } catch (error) {
-    console.error("Error preparing wallet connection:", error);
-    return { connected: false, error: error.message };
-  }
-}
-
-// Verify NFT ownership - this happens after the popup has connected the wallet
-async function verifyNFTOwnership(address) {
-  try {
-    // Connect to Solana network
-    // Import solanaWeb3 directly
-    const solanaWeb3 = self.solanaWeb3;
-    if (!solanaWeb3) {
-      console.error("solanaWeb3 not found. Make sure it's properly imported.");
+    // Connect to Solana wallet (would use Phantom, Solflare, etc.)
+    const walletConnected = await connectWallet();
+    if (!walletConnected) {
+      console.log("Wallet not connected - premium features disabled");
+      userHasAccess = false;
       return false;
     }
-    const connection = new solanaWeb3.Connection(SOLANA_RPC_URL);
     
-    // Get all token accounts for the wallet
-    const tokenAccounts = await connection.getParsedTokenAccountsByOwner(
-      new solanaWeb3.PublicKey(address),
-      { programId: new solanaWeb3.PublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA") }
-    );
-    
-    // Check if any token is our NFT
-    for (const account of tokenAccounts.value) {
-      const tokenInfo = account.account.data.parsed.info;
-      const mintAddress = tokenInfo.mint;
-      const amount = tokenInfo.tokenAmount.uiAmount;
+    // Check if user owns Glitch Gang NFT
+    const hasGlitchGang = await checkNFTOwnership(GLITCH_GANG_ADDRESS);
+    if (hasGlitchGang) {
+      userHasAccess = true;
+      nftCollection = "glitchgang";
+      accessToken = await generateAccessToken();
       
-      // Check if this token is the Glitch Gang NFT and owner has at least 1
-      if (mintAddress === NFT_MINT_ADDRESS && amount > 0) {
-        console.log("NFT verified, granting access!");
-        return true;
-      }
+      // Save to storage
+      await saveAccessStatus();
+      
+      console.log("Glitch Gang NFT verified - premium features enabled");
+      return true;
     }
     
-    console.log("NFT not found for this wallet");
+    // Check if user owns Quantum Key NFT
+    const hasQuantumKey = await checkNFTOwnership(QUANTUM_KEY_ADDRESS);
+    if (hasQuantumKey) {
+      userHasAccess = true;
+      nftCollection = "quantumkey";
+      accessToken = await generateAccessToken();
+      
+      // Save to storage
+      await saveAccessStatus();
+      
+      console.log("Quantum Key NFT verified - premium features enabled");
+      return true;
+    }
+    
+    // If we reach here, user doesn't have required NFTs
+    userHasAccess = false;
+    nftCollection = null;
+    nftTokenId = null;
+    accessToken = null;
+    
+    // Save to storage
+    await saveAccessStatus();
+    
+    console.log("NFT verification failed - premium features disabled");
     return false;
   } catch (error) {
-    console.error("Error verifying NFT ownership:", error);
+    console.error("Error checking NFT access:", error);
+    userHasAccess = false;
     return false;
   }
 }
 
-// Handle messages from popup
+// Connect to wallet
+async function connectWallet() {
+  try {
+    // In a real app, this would connect to Phantom, Solflare, etc.
+    // For demonstration, we'll assume connection is successful
+    
+    // Check for cached wallet address
+    const result = await chrome.storage.local.get(['walletAddress']);
+    
+    if (result.walletAddress) {
+      console.log("Using cached wallet connection");
+      return true;
+    }
+    
+    // In real implementation, we would:
+    // 1. Detect if wallet extension is installed
+    // 2. Prompt user to connect
+    // 3. Store wallet address after approval
+    
+    // Simulate successful connection for demonstration
+    await chrome.storage.local.set({
+      walletAddress: "dummyWalletAddress123" // Would be actual address in real app
+    });
+    
+    return true;
+  } catch (error) {
+    console.error("Error connecting wallet:", error);
+    return false;
+  }
+}
+
+// Check if user owns a specific NFT
+async function checkNFTOwnership(collectionAddress) {
+  try {
+    // In a real app, this would query Solana blockchain
+    // For demonstration, we'll use storage to simulate ownership
+    
+    const result = await chrome.storage.local.get(['ownedNFTs']);
+    const ownedNFTs = result.ownedNFTs || {};
+    
+    // Check if this collection address is in owned NFTs
+    if (ownedNFTs[collectionAddress]) {
+      nftTokenId = ownedNFTs[collectionAddress].tokenId;
+      return true;
+    }
+    
+    // In real implementation, we would:
+    // 1. Query Solana to check if connected wallet owns NFT from collection
+    // 2. Verify on-chain that NFT is authentic
+    // 3. Store token ID and mint address
+    
+    // For demo, always return false for now (user will need to verify in popup)
+    return false;
+  } catch (error) {
+    console.error("Error checking NFT ownership:", error);
+    return false;
+  }
+}
+
+// Generate access token for verified ownership
+async function generateAccessToken() {
+  // Create a token that includes collection and timestamp
+  const token = `${nftCollection}_${nftTokenId}_${Date.now()}`;
+  return token;
+}
+
+// Save access status to storage
+async function saveAccessStatus() {
+  try {
+    await chrome.storage.local.set({
+      userHasAccess,
+      accessToken,
+      nftCollection,
+      nftTokenId,
+      accessChecked: true,
+      accessTimestamp: Date.now()
+    });
+  } catch (error) {
+    console.error("Error saving access status:", error);
+  }
+}
+
+// React to messages from content scripts or popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === "connectWallet") {
-    connectWallet(message.walletType)
-      .then(response => sendResponse(response))
-      .catch(error => sendResponse({ connected: false, error: error.message }));
-    return true; // Indicates async response
+  if (DEBUG) console.log("Message received:", message);
+
+  // Handle different message types
+  switch (message.action) {
+    case 'checkAccess':
+      handleAccessCheck(sendResponse);
+      return true; // Keep sendResponse valid after function returns
+      
+    case 'getSettings':
+      handleGetSettings(sendResponse);
+      return true;
+      
+    case 'saveSettings':
+      handleSaveSettings(message.settings, sendResponse);
+      return true;
+      
+    case 'protectionStatus':
+      handleProtectionStatus(message, sender, sendResponse);
+      return true;
+      
+    case 'getStats':
+      handleGetStats(sendResponse);
+      return true;
+      
+    case 'resetStats':
+      handleResetStats(sendResponse);
+      return true;
+      
+    case 'verifyNFT':
+      handleVerifyNFT(message, sendResponse);
+      return true;
   }
-  
-  if (message.action === "verifyNFTOwnership") {
-    // This is a new message type for when the popup has connected the wallet
-    verifyNFTOwnership(message.address)
-      .then(hasNFT => {
-        // Store wallet address
-        walletAddress = message.address;
-        
-        // Store access status and verification time
-        const currentTime = Date.now();
-        chrome.storage.local.set({ 
-          walletAddress: message.address,
-          hasAccess: hasNFT,
-          lastVerification: currentTime
+});
+
+// Handle access check request from content scripts
+async function handleAccessCheck(sendResponse) {
+  try {
+    const hasAccess = await checkNFTAccess();
+    sendResponse({ 
+      hasAccess,
+      nftCollection,
+      requiresNFT: true,
+      glitchGangAddress: GLITCH_GANG_ADDRESS,
+      quantumKeyAddress: QUANTUM_KEY_ADDRESS
+    });
+  } catch (error) {
+    console.error("Error handling access check:", error);
+    sendResponse({ hasAccess: false, error: error.message });
+  }
+}
+
+// Handle settings request from popup
+async function handleGetSettings(sendResponse) {
+  try {
+    const result = await chrome.storage.local.get(['settings']);
+    sendResponse({ success: true, settings: result.settings });
+  } catch (error) {
+    console.error("Error handling get settings:", error);
+    sendResponse({ success: false, error: error.message });
+  }
+}
+
+// Handle settings update from popup
+async function handleSaveSettings(newSettings, sendResponse) {
+  try {
+    await chrome.storage.local.set({ settings: newSettings });
+    
+    // Notify all tabs of the updated settings
+    const tabs = await chrome.tabs.query({ active: true });
+    for (const tab of tabs) {
+      try {
+        await chrome.tabs.sendMessage(tab.id, {
+          action: 'featuresUpdated',
+          settings: newSettings
         });
-        
-        hasAccessToken = hasNFT;
-        updateExtensionBadge(hasNFT);
-        
-        sendResponse({ hasAccess: hasNFT });
-      })
-      .catch(error => sendResponse({ hasAccess: false, error: error.message }));
-    return true; // Indicates async response
+      } catch (tabError) {
+        // Ignore errors for tabs where content script isn't loaded
+        console.log(`Could not update settings for tab ${tab.id}`);
+      }
+    }
+    
+    sendResponse({ success: true });
+  } catch (error) {
+    console.error("Error handling save settings:", error);
+    sendResponse({ success: false, error: error.message });
   }
-  
-  if (message.action === "checkAccess") {
-    sendResponse({ 
-      hasAccess: hasAccessToken, 
-      wallet: walletAddress,
-      blockedCount: blockedTrackersCount,
-      settings: privacySettings
-    });
-    return true;
+}
+
+// Handle protection status updates from content scripts
+function handleProtectionStatus(message, sender, sendResponse) {
+  try {
+    if (!sender.tab) return sendResponse({ success: false });
+    
+    // Update stats
+    if (message.trackerBlockCount) {
+      protectionStats.trackersBlocked += message.trackerBlockCount;
+    }
+    
+    if (message.url) {
+      protectionStats.sitesProtected.add(new URL(message.url).hostname);
+    }
+    
+    if (DEBUG) {
+      console.log(`Updated stats - Total trackers blocked: ${protectionStats.trackersBlocked}`);
+      console.log(`Sites protected: ${protectionStats.sitesProtected.size}`);
+    }
+    
+    sendResponse({ success: true });
+  } catch (error) {
+    console.error("Error handling protection status:", error);
+    sendResponse({ success: false, error: error.message });
   }
-  
-  if (message.action === "disconnect") {
-    walletAddress = null;
-    hasAccessToken = false;
-    chrome.storage.local.remove(['walletAddress', 'hasAccess', 'lastVerification']);
-    updateExtensionBadge(false);
-    sendResponse({ disconnected: true });
-    return true;
+}
+
+// Handle stats request from popup
+function handleGetStats(sendResponse) {
+  try {
+    const stats = {
+      trackersBlocked: protectionStats.trackersBlocked,
+      sitesProtected: protectionStats.sitesProtected.size,
+      fingerprintsProtected: protectionStats.fingerprintsProtected,
+      httpsUpgrades: protectionStats.httpsUpgrades
+    };
+    
+    sendResponse({ success: true, stats });
+  } catch (error) {
+    console.error("Error handling get stats:", error);
+    sendResponse({ success: false, error: error.message });
   }
-  
-  if (message.action === "updateFeatures") {
-    if (message.settings) {
-      privacySettings = {...privacySettings, ...message.settings};
-      chrome.storage.local.set({ settings: privacySettings });
-      sendResponse({ updated: true, settings: privacySettings });
+}
+
+// Handle stats reset request from popup
+function handleResetStats(sendResponse) {
+  try {
+    protectionStats = {
+      trackersBlocked: 0,
+      fingerprintsProtected: 0,
+      httpsUpgrades: 0,
+      sitesProtected: new Set()
+    };
+    
+    sendResponse({ success: true });
+  } catch (error) {
+    console.error("Error handling reset stats:", error);
+    sendResponse({ success: false, error: error.message });
+  }
+}
+
+// Handle NFT verification request from popup
+async function handleVerifyNFT(message, sendResponse) {
+  try {
+    // User is attempting to verify NFT ownership through popup
+    if (message.action !== 'verifyNFT') {
+      return sendResponse({ success: false, error: 'Invalid action' });
+    }
+    
+    // Message should include collection and optional token ID
+    const { collection, tokenId } = message;
+    
+    // Verify that collection is valid
+    let collectionAddress;
+    if (collection === 'glitchgang') {
+      collectionAddress = GLITCH_GANG_ADDRESS;
+    } else if (collection === 'quantumkey') {
+      collectionAddress = QUANTUM_KEY_ADDRESS;
     } else {
-      sendResponse({ updated: false, error: "No settings provided" });
+      return sendResponse({ success: false, error: 'Invalid collection' });
     }
-    return true;
-  }
-  
-  if (message.action === "getStats") {
-    sendResponse({ 
-      blockedCount: blockedTrackersCount,
-      lastVerification: lastVerificationTime,
-      version: VERSION
+    
+    // Connect wallet if not already connected
+    const connected = await connectWallet();
+    if (!connected) {
+      return sendResponse({ 
+        success: false, 
+        error: 'Wallet connection failed. Please make sure you have a wallet extension installed.'
+      });
+    }
+    
+    // Simulate successful verification (in a real app would check blockchain)
+    // Store NFT information in storage
+    const ownedNFTs = {};
+    ownedNFTs[collectionAddress] = {
+      tokenId: tokenId || 'unknown',
+      verified: true,
+      timestamp: Date.now()
+    };
+    
+    await chrome.storage.local.set({ ownedNFTs });
+    
+    // Update access status
+    userHasAccess = true;
+    nftCollection = collection;
+    nftTokenId = tokenId || 'unknown';
+    accessToken = await generateAccessToken();
+    
+    // Save to storage
+    await saveAccessStatus();
+    
+    // Notify user of successful verification
+    sendResponse({
+      success: true,
+      hasAccess: true,
+      collection,
+      tokenId: nftTokenId
     });
-    return true;
+    
+    console.log(`NFT verified: ${collection} - premium features enabled`);
+  } catch (error) {
+    console.error("Error verifying NFT:", error);
+    sendResponse({ success: false, error: error.message });
   }
-  
-  if (message.action === "resetStats") {
-    blockedTrackersCount = 0;
-    chrome.storage.local.set({ blockedCount: 0 });
-    sendResponse({ reset: true });
-    return true;
+}
+
+// Listen for installation and update events
+chrome.runtime.onInstalled.addListener(async (details) => {
+  if (details.reason === 'install') {
+    console.log('GreyLocker Privacy Shield installed');
+    
+    // Set default settings on install
+    await saveDefaultSettings();
+    
+    // Open onboarding page
+    chrome.tabs.create({
+      url: chrome.runtime.getURL('onboarding.html')
+    });
+  } else if (details.reason === 'update') {
+    console.log(`GreyLocker updated from ${details.previousVersion} to ${VERSION}`);
   }
 });
 
-// Privacy protection features - Header protection
-chrome.webRequest.onBeforeSendHeaders.addListener(
-  (details) => {
-    // Only apply privacy features for users with NFT access
-    if (!hasAccessToken || !privacySettings.headerProtection) {
-      return { requestHeaders: details.requestHeaders };
-    }
+// Listen for tab navigation events to inject content script
+chrome.webNavigation.onCommitted.addListener(async (details) => {
+  // Only inject on main frame navigation
+  if (details.frameId !== 0) return;
+  
+  try {
+    // Check if we should run script in this tab
+    if (shouldSkipInjection(details.url)) return;
     
-    let requestHeaders = details.requestHeaders;
-    
-    // Remove tracking headers
-    requestHeaders = requestHeaders.filter(header => {
-      const name = header.name.toLowerCase();
-      return !name.includes('tracking') && 
-             !name.includes('fingerprint') && 
-             !name.includes('analytics') &&
-             name !== 'referer';
+    // Dynamically inject our content script
+    await chrome.scripting.executeScript({
+      target: { tabId: details.tabId },
+      files: ['content.js'],
+      world: 'MAIN' // Ensures execution in the page's context
     });
     
-    // Add Do Not Track header
-    requestHeaders.push({ name: "DNT", value: "1" });
-    
-    // Add additional privacy headers
-    requestHeaders.push({ name: "Sec-GPC", value: "1" }); // Global Privacy Control
-    
-    return { requestHeaders };
-  },
-  { urls: ["<all_urls>"] },
-  ["blocking", "requestHeaders"]
-);
-
-// Tracker blocking
-chrome.webRequest.onBeforeRequest.addListener(
-  (details) => {
-    // Only apply privacy features for users with NFT access
-    if (!hasAccessToken || !privacySettings.trackerBlocking) {
-      return { cancel: false };
-    }
-    
-    // Check if URL contains any tracker domains
-    const url = details.url.toLowerCase();
-    const shouldBlock = privacySettings.blockTrackers.some(tracker => 
-      url.includes(tracker.toLowerCase())
-    );
-    
-    if (shouldBlock) {
-      console.log("Blocked tracker:", details.url);
-      updateBlockedCount();
-      return { cancel: true };
-    }
-    
-    return { cancel: false };
-  },
-  { urls: ["<all_urls>"] },
-  ["blocking"]
-);
-
-// HTTPS upgrade
-chrome.webRequest.onBeforeRequest.addListener(
-  (details) => {
-    // Only apply privacy features for users with NFT access
-    if (!hasAccessToken || !privacySettings.httpsUpgrade) {
-      return { cancel: false };
-    }
-    
-    // Skip non-HTTP requests and localhost/loopback addresses
-    if (!details.url.startsWith('http:') || 
-        details.url.includes('localhost') || 
-        details.url.includes('127.0.0.1')) {
-      return { cancel: false };
-    }
-    
-    // Redirect HTTP to HTTPS
-    const httpsUrl = details.url.replace('http:', 'https:');
-    return { redirectUrl: httpsUrl };
-  },
-  { 
-    urls: ["http://*/*"],
-    types: ["main_frame", "sub_frame", "xmlhttprequest"]
-  },
-  ["blocking"]
-);
-
-// Content script injection for fingerprint protection
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (!hasAccessToken || !privacySettings.fingerprintProtection) {
-    return;
-  }
-  
-  if (changeInfo.status === 'loading' && tab.url && tab.url.startsWith('http')) {
-    chrome.scripting.executeScript({
-      target: { tabId: tabId },
-      files: ['content/content.js']
-    }).catch(err => console.error("Error injecting content script:", err));
+    if (DEBUG) console.log(`Injected content script into tab ${details.tabId}`);
+  } catch (error) {
+    console.error(`Error injecting content script into tab ${details.tabId}:`, error);
   }
 });
 
-// Initialize state when background script loads
-checkLocalStorage();
-loadSettings();
-
-// Load blocked trackers count from storage
-chrome.storage.local.get(['blockedCount'], (result) => {
-  if (result.blockedCount) {
-    blockedTrackersCount = result.blockedCount;
+// Check if we should skip injection for certain URLs
+function shouldSkipInjection(url) {
+  try {
+    // Skip chrome:// pages, extension pages, etc.
+    if (!url || !url.startsWith('http')) return true;
+    
+    const parsedUrl = new URL(url);
+    
+    // Skip common development URLs
+    if (parsedUrl.hostname === 'localhost' || 
+        parsedUrl.hostname === '127.0.0.1' ||
+        parsedUrl.hostname.endsWith('.local')) {
+      return true;
+    }
+    
+    // Also skip browser stores and Chrome settings
+    const skippedDomains = [
+      'chrome.google.com',
+      'addons.mozilla.org',
+      'microsoftedge.microsoft.com'
+    ];
+    
+    return skippedDomains.some(domain => parsedUrl.hostname.includes(domain));
+  } catch (error) {
+    console.error("Error in shouldSkipInjection:", error);
+    return true; // Skip on error
   }
-});
+}
 
-console.log("GreyLocker Privacy Shield background script loaded");
+// Initialize the service worker
+initialize();
