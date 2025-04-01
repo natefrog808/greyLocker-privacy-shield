@@ -44,14 +44,5 @@
       "resources": ["lib/*", "assets/*", "dashboard/*"],
       "matches": ["<all_urls>"]
     }
-  ],
-  "declarative_net_request": {
-    "rule_resources": [
-      {
-        "id": "ruleset_1",
-        "enabled": true,
-        "path": "rules/rules.json"
-      }
-    ]
-  }
+  ]
 }
