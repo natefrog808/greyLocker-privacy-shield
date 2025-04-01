@@ -41,7 +41,7 @@ While the masses remain exposed in the digital bazaar, you move like a shadow, u
 
 - **Chrome/Brave/Edge**: v85+
 - **Solana Wallet**: Phantom or Solflare
-- **Critical Asset**: One Megapixel Core NFT
+- **Critical Asset**: A Quantum Key or Glitch Gang NFT
 - **System Specs**: 4GB RAM, modern processor
 - **Connection**: Stable uplink to the grid
 
