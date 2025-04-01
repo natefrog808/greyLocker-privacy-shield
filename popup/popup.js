@@ -1,6 +1,7 @@
 /**
  * GreyLocker Privacy Shield
  * Popup functionality for controlling privacy settings
+ * Updated to work with Manifest V3 and NFT verification system
  */
 
 // DOM Elements
@@ -28,21 +29,35 @@ const httpsUpgradeToggle = document.getElementById('https-upgrade');
 const headerProtectionToggle = document.getElementById('header-protection');
 
 // Advanced feature toggles
-const canvasProtectionToggle = document.getElementById('canvas-protection');
-const webglProtectionToggle = document.getElementById('webgl-protection');
 const audioProtectionToggle = document.getElementById('audio-protection');
+const webglProtectionToggle = document.getElementById('webgl-protection');
 const fontProtectionToggle = document.getElementById('font-protection');
+const batteryProtectionToggle = document.getElementById('battery-protection');
+const screenResolutionToggle = document.getElementById('screen-resolution');
+const mediaDevicesToggle = document.getElementById('media-devices');
 const webrtcProtectionToggle = document.getElementById('webrtc-protection');
 const timingProtectionToggle = document.getElementById('timing-protection');
+const storageProtectionToggle = document.getElementById('storage-protection');
+
+// NFT info
+const glitchGangAddress = "EpyXG6ZH98zKgex5GccGW6r2yeYfMuvkvG3cES5iP95k";
+const quantumKeyAddress = "EALacBDs4xqu4xyKcp6gCkjtjU6psh2ykZj4Xv2Qqgwu";
+const nftCollectionLinks = {
+  glitchgang: "https://magiceden.io/marketplace/glitch_gang",
+  quantumkey: "https://magiceden.io/marketplace/quantum_key"
+};
 
 // State variables
 let statsUpdateInterval;
 let blockCount = 0;
 let fingerprintCount = 0;
+let walletAddress = null;
+let connectedWalletType = null;
+let currentNftCollection = null;
 
 // Initialize popup state
 document.addEventListener('DOMContentLoaded', () => {
-  checkWalletConnection();
+  checkAccessStatus();
   setupEventListeners();
   loadFeatureSettings();
   startStatsAnimation();
@@ -76,12 +91,15 @@ function setupEventListeners() {
   headerProtectionToggle.addEventListener('change', updateFeatureSettings);
   
   // Advanced feature toggles
-  canvasProtectionToggle.addEventListener('change', updateAdvancedFeatureSettings);
-  webglProtectionToggle.addEventListener('change', updateAdvancedFeatureSettings);
   audioProtectionToggle.addEventListener('change', updateAdvancedFeatureSettings);
+  webglProtectionToggle.addEventListener('change', updateAdvancedFeatureSettings);
   fontProtectionToggle.addEventListener('change', updateAdvancedFeatureSettings);
+  batteryProtectionToggle.addEventListener('change', updateAdvancedFeatureSettings);
+  screenResolutionToggle.addEventListener('change', updateAdvancedFeatureSettings);
+  mediaDevicesToggle.addEventListener('change', updateAdvancedFeatureSettings);
   webrtcProtectionToggle.addEventListener('change', updateAdvancedFeatureSettings);
   timingProtectionToggle.addEventListener('change', updateAdvancedFeatureSettings);
+  storageProtectionToggle.addEventListener('change', updateAdvancedFeatureSettings);
   
   // Advanced toggle
   advancedToggle.addEventListener('click', toggleAdvancedFeatures);
@@ -90,10 +108,23 @@ function setupEventListeners() {
   document.getElementById('open-dashboard')?.addEventListener('click', function() {
     chrome.tabs.create({ url: chrome.runtime.getURL('dashboard/dashboard.html') });
   });
+  
+  // NFT verification buttons
+  document.getElementById('verify-glitchgang')?.addEventListener('click', () => verifyNFT('glitchgang'));
+  document.getElementById('verify-quantumkey')?.addEventListener('click', () => verifyNFT('quantumkey'));
+  
+  // Marketplace links
+  document.getElementById('glitchgang-link')?.addEventListener('click', () => {
+    chrome.tabs.create({ url: nftCollectionLinks.glitchgang });
+  });
+  
+  document.getElementById('quantumkey-link')?.addEventListener('click', () => {
+    chrome.tabs.create({ url: nftCollectionLinks.quantumkey });
+  });
 }
 
-// Check if wallet is already connected
-function checkWalletConnection() {
+// Check if wallet is already connected and if NFT access is verified
+function checkAccessStatus() {
   updateUIState('loading');
   
   chrome.runtime.sendMessage({ action: 'checkAccess' }, (response) => {
@@ -103,15 +134,27 @@ function checkWalletConnection() {
       return;
     }
     
-    if (response.wallet && response.hasAccess) {
-      updateUIState('verified', response.wallet);
-      updateStatCounters(response.blockedCount || 0);
-      if (response.settings) {
-        updateToggleStates(response.settings);
-      }
-    } else if (response.wallet && !response.hasAccess) {
-      updateUIState('failed', response.wallet);
+    if (response.hasAccess) {
+      // User has verified NFT access
+      walletAddress = response.walletAddress || "Verified";
+      currentNftCollection = response.nftCollection;
+      updateUIState('verified');
+      
+      // Start stats update
+      chrome.runtime.sendMessage({ action: 'getStats' }, (statsResponse) => {
+        if (statsResponse && statsResponse.success) {
+          updateStatCounters(
+            statsResponse.stats.trackersBlocked || 0,
+            statsResponse.stats.fingerprintsProtected || 0
+          );
+        }
+      });
+    } else if (response.walletAddress && !response.hasAccess) {
+      // User has connected wallet but no verified NFT
+      walletAddress = response.walletAddress;
+      updateUIState('failed');
     } else {
+      // User hasn't connected wallet yet
       updateUIState('disconnected');
     }
   });
@@ -120,95 +163,163 @@ function checkWalletConnection() {
 // Connect wallet
 function connectWallet(walletType) {
   updateUIState('connecting');
+  connectedWalletType = walletType;
   
-  // First, check with background script
-  chrome.runtime.sendMessage(
-    { action: 'connectWallet', walletType },
-    (response) => {
-      if (response.needsPopupConnection) {
-        // Now handle the actual wallet connection in the popup
-        if (walletType === 'phantom') {
-          // Check if Phantom is installed
-          if (!window.solana) {
-            updateUIState('error', null, "Phantom wallet not found. Please install it.");
-            return;
-          }
-          
-          // Connect to the wallet
-          window.solana.connect()
-            .then(response => {
-              const walletAddress = response.publicKey.toString();
-              // Verify the NFT ownership via background script
-              chrome.runtime.sendMessage(
-                { action: 'verifyNFTOwnership', address: walletAddress },
-                (verifyResponse) => {
-                  if (verifyResponse.hasAccess) {
-                    updateUIState('verified', walletAddress);
-                  } else {
-                    updateUIState('failed', walletAddress);
-                  }
-                }
-              );
-            })
-            .catch(error => {
-              console.error("Error connecting to Phantom:", error);
-              updateUIState('error', null, error.message || "Failed to connect to Phantom");
-            });
-        } 
-        else if (walletType === 'solflare') {
-          // Check if Solflare is installed
-          if (!window.solflare) {
-            updateUIState('error', null, "Solflare wallet not found. Please install it.");
-            return;
-          }
-          
-          // Connect to the wallet
-          window.solflare.connect()
-            .then(() => {
-              const walletAddress = window.solflare.publicKey.toString();
-              // Verify the NFT ownership via background script
-              chrome.runtime.sendMessage(
-                { action: 'verifyNFTOwnership', address: walletAddress },
-                (verifyResponse) => {
-                  if (verifyResponse.hasAccess) {
-                    updateUIState('verified', walletAddress);
-                  } else {
-                    updateUIState('failed', walletAddress);
-                  }
-                }
-              );
-            })
-            .catch(error => {
-              console.error("Error connecting to Solflare:", error);
-              updateUIState('error', null, error.message || "Failed to connect to Solflare");
-            });
-        }
-      } else if (!response) {
-        console.error("Failed to connect wallet");
-        updateUIState('error', null, "Connection failed");
-      } else if (response.error) {
-        updateUIState('error', null, response.error);
-        setTimeout(() => {
-          updateUIState('disconnected');
-        }, 3000);
-      }
+  try {
+    if (walletType === 'phantom') {
+      connectPhantomWallet();
+    } else if (walletType === 'solflare') {
+      connectSolflareWallet();
     }
-  );
+  } catch (error) {
+    console.error(`Error connecting to ${walletType}:`, error);
+    updateUIState('error', null, `Failed to connect to ${walletType}. ${error.message || ''}`);
+  }
+}
+
+// Connect to Phantom wallet
+async function connectPhantomWallet() {
+  // Check if Phantom is installed
+  if (!window.solana || !window.solana.isPhantom) {
+    updateUIState('error', null, "Phantom wallet not found. Please install it first.");
+    
+    // Open Phantom installation page
+    setTimeout(() => {
+      if (confirm("Would you like to install Phantom wallet?")) {
+        chrome.tabs.create({ url: "https://phantom.app/" });
+      }
+      updateUIState('disconnected');
+    }, 2000);
+    return;
+  }
+  
+  try {
+    // Connect to Phantom
+    const resp = await window.solana.connect({ onlyIfTrusted: false });
+    walletAddress = resp.publicKey.toString();
+    
+    // Store wallet info
+    chrome.storage.local.set({
+      walletAddress,
+      walletType: 'phantom'
+    });
+    
+    // Check NFT ownership
+    updateUIState('verifying');
+    
+    // Just update UI for now - actual verification happens when verify button is clicked
+    updateUIState('failed');
+  } catch (error) {
+    console.error("Error connecting to Phantom:", error);
+    updateUIState('error', null, error.message || "Failed to connect to Phantom");
+    setTimeout(() => updateUIState('disconnected'), 3000);
+  }
+}
+
+// Connect to Solflare wallet
+async function connectSolflareWallet() {
+  // Check if Solflare is installed
+  if (!window.solflare || !window.solflare.isSolflare) {
+    updateUIState('error', null, "Solflare wallet not found. Please install it first.");
+    
+    // Open Solflare installation page
+    setTimeout(() => {
+      if (confirm("Would you like to install Solflare wallet?")) {
+        chrome.tabs.create({ url: "https://solflare.com/" });
+      }
+      updateUIState('disconnected');
+    }, 2000);
+    return;
+  }
+  
+  try {
+    // Connect to Solflare
+    await window.solflare.connect();
+    walletAddress = window.solflare.publicKey.toString();
+    
+    // Store wallet info
+    chrome.storage.local.set({
+      walletAddress,
+      walletType: 'solflare'
+    });
+    
+    // Check NFT ownership
+    updateUIState('verifying');
+    
+    // Just update UI for now - actual verification happens when verify button is clicked
+    updateUIState('failed');
+  } catch (error) {
+    console.error("Error connecting to Solflare:", error);
+    updateUIState('error', null, error.message || "Failed to connect to Solflare");
+    setTimeout(() => updateUIState('disconnected'), 3000);
+  }
+}
+
+// Verify NFT ownership
+function verifyNFT(collection) {
+  if (!walletAddress) {
+    console.error("No wallet connected");
+    return;
+  }
+  
+  updateUIState('verifying');
+  
+  // Send verification request to background script
+  chrome.runtime.sendMessage({
+    action: 'verifyNFT',
+    collection,
+    tokenId: null // We don't need specific token ID for this implementation
+  }, (response) => {
+    if (!response) {
+      console.error("Failed to verify NFT");
+      updateUIState('error', null, "Verification failed");
+      setTimeout(() => updateUIState('failed'), 3000);
+      return;
+    }
+    
+    if (response.success && response.hasAccess) {
+      // NFT verified successfully
+      currentNftCollection = collection;
+      updateUIState('verified');
+      
+      // Start stats update
+      startStatsUpdate();
+    } else {
+      // Verification failed
+      updateUIState('failed');
+      
+      console.error("NFT verification failed:", response.error || "Not owned");
+    }
+  });
 }
 
 // Disconnect wallet
 function disconnectWallet() {
-  chrome.runtime.sendMessage({ action: 'disconnect' }, (response) => {
-    if (response && response.disconnected) {
-      updateUIState('disconnected');
-      
-      // Stop updating stats
-      if (statsUpdateInterval) {
-        clearInterval(statsUpdateInterval);
-        statsUpdateInterval = null;
-      }
+  // Disconnect from wallet provider if available
+  try {
+    if (connectedWalletType === 'phantom' && window.solana) {
+      window.solana.disconnect();
+    } else if (connectedWalletType === 'solflare' && window.solflare) {
+      window.solflare.disconnect();
     }
-  });
+  } catch (e) {
+    console.error("Error disconnecting wallet:", e);
+  }
+  
+  // Clear wallet info in storage
+  chrome.storage.local.remove(['walletAddress', 'walletType']);
+  
+  // Reset UI state
+  walletAddress = null;
+  connectedWalletType = null;
+  currentNftCollection = null;
+  updateUIState('disconnected');
+  
+  // Stop updating stats
+  if (statsUpdateInterval) {
+    clearInterval(statsUpdateInterval);
+    statsUpdateInterval = null;
+  }
 }
 
 // Copy wallet address to clipboard
@@ -251,11 +362,12 @@ function toggleAdvancedFeatures() {
 
 // Reset to connection state
 function resetConnectionState() {
-  updateUIState('disconnected');
+  // Disconnect current wallet before showing connect options
+  disconnectWallet();
 }
 
 // Update UI based on connection state
-function updateUIState(state, walletAddress, errorMessage) {
+function updateUIState(state, errorMessage) {
   // Hide all sections first
   connectSection.classList.add('hidden');
   featuresSection.classList.add('hidden');
@@ -280,12 +392,25 @@ function updateUIState(state, walletAddress, errorMessage) {
       statusText.textContent = 'CONNECTING...';
       break;
       
+    case 'verifying':
+      statusIndicator.className = 'status-indicator pending';
+      statusText.textContent = 'VERIFYING NFT...';
+      break;
+      
     case 'verified':
       statusIndicator.className = 'status-indicator connected';
       statusText.textContent = 'SHIELD ACTIVE';
       featuresSection.classList.remove('hidden');
       walletConnectedSection.classList.remove('hidden');
       walletAddressText.textContent = truncateAddress(walletAddress);
+      
+      // Show which NFT is active
+      const nftBadge = document.getElementById('nft-badge');
+      if (nftBadge) {
+        nftBadge.textContent = currentNftCollection === 'glitchgang' ? 
+          'Glitch Gang' : 'Quantum Key';
+        nftBadge.classList.remove('hidden');
+      }
       
       // Add digital rain animation
       featuresSection.classList.add('active-shield');
@@ -296,7 +421,7 @@ function updateUIState(state, walletAddress, errorMessage) {
       
     case 'failed':
       statusIndicator.className = 'status-indicator';
-      statusText.textContent = 'VERIFICATION FAILED';
+      statusText.textContent = 'VERIFICATION NEEDED';
       verificationFailedSection.classList.remove('hidden');
       walletConnectedSection.classList.remove('hidden');
       walletAddressText.textContent = truncateAddress(walletAddress);
@@ -356,12 +481,28 @@ function updateToggleStates(settings) {
       fontProtectionToggle.checked = settings.advancedProtection.fontFingerprint;
     }
     
+    if (settings.advancedProtection.batteryFingerprint !== undefined) {
+      batteryProtectionToggle.checked = settings.advancedProtection.batteryFingerprint;
+    }
+    
+    if (settings.advancedProtection.screenResolution !== undefined) {
+      screenResolutionToggle.checked = settings.advancedProtection.screenResolution;
+    }
+    
+    if (settings.advancedProtection.mediaDevices !== undefined) {
+      mediaDevicesToggle.checked = settings.advancedProtection.mediaDevices;
+    }
+    
     if (settings.advancedProtection.webrtcProtection !== undefined) {
       webrtcProtectionToggle.checked = settings.advancedProtection.webrtcProtection;
     }
     
     if (settings.advancedProtection.timingProtection !== undefined) {
       timingProtectionToggle.checked = settings.advancedProtection.timingProtection;
+    }
+    
+    if (settings.advancedProtection.storageProtection !== undefined) {
+      storageProtectionToggle.checked = settings.advancedProtection.storageProtection;
     }
   }
 }
@@ -381,7 +522,7 @@ function updateFeatureSettings() {
     
     chrome.storage.local.set({ settings: updatedSettings });
     chrome.runtime.sendMessage({ 
-      action: 'updateFeatures', 
+      action: 'saveSettings', 
       settings: updatedSettings 
     });
   });
@@ -393,8 +534,12 @@ function updateAdvancedFeatureSettings() {
     audioFingerprint: audioProtectionToggle.checked,
     webglFingerprint: webglProtectionToggle.checked,
     fontFingerprint: fontProtectionToggle.checked,
+    batteryFingerprint: batteryProtectionToggle.checked,
+    screenResolution: screenResolutionToggle.checked,
+    mediaDevices: mediaDevicesToggle.checked,
     webrtcProtection: webrtcProtectionToggle.checked,
-    timingProtection: timingProtectionToggle.checked
+    timingProtection: timingProtectionToggle.checked,
+    storageProtection: storageProtectionToggle.checked
   };
   
   chrome.storage.local.get(['settings'], (result) => {
@@ -411,7 +556,7 @@ function updateAdvancedFeatureSettings() {
     
     chrome.storage.local.set({ settings: updatedSettings });
     chrome.runtime.sendMessage({ 
-      action: 'updateFeatures', 
+      action: 'saveSettings', 
       settings: updatedSettings 
     });
   });
@@ -434,9 +579,12 @@ function startStatsUpdate() {
 // Update stats from background
 function updateStats() {
   chrome.runtime.sendMessage({ action: 'getStats' }, (response) => {
-    if (!response) return;
+    if (!response || !response.success) return;
     
-    updateStatCounters(response.blockedCount || 0, response.fingerprintCount || 0);
+    updateStatCounters(
+      response.stats.trackersBlocked || 0, 
+      response.stats.fingerprintsProtected || 0
+    );
   });
 }
 
